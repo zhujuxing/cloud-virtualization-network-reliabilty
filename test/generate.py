@@ -80,7 +80,7 @@ def main():
             g.nodes[i]['NodeFailMT'] = 0.166667
             g.nodes[i]['NodeMP'] = [nx.shortest_path(g,i,'S4'),
                                     nx.shortest_path(g,i,'D1')]
-    nx.write_gpickle(g,'g.gpickle')
+
     
     
     Application_info = Application_info.rename(columns={'业务名称':'ApplicationID',
@@ -113,6 +113,8 @@ def main():
     g.graph['VNF_info'] = VNF_info
     g.graph['Service_info'] = Service_info
     g.graph['Application_info'] = Application_info
+    
+    nx.write_gpickle(g,'g.gpickle')
     return g
             
 def show_nodes_data(g):
