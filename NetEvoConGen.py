@@ -249,7 +249,8 @@ def net_evo_con_gen(Gpath, T):
     Returns
     -------
     evol : TYPE
-        DESCRIPTION.
+        行值：各个持续时间
+        列值：各该时间区间对应的构件名称NodeID列表.
 
     """
     init(Gpath, T)
