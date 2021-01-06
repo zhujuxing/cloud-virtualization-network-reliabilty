@@ -6,7 +6,7 @@ Created on Thu Dec 31 05:37:33 2020
 """
 
 
-import netwrokx as nx
+import networkx as nx
 import pandas as pd
 import NetEvoObjMod.net_evo_obj_mod
 
