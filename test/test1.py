@@ -8,7 +8,7 @@ Created on Thu Dec 31 05:36:41 2020
 import networkx as nx
 import pandas as pd
 import xlrd
-
+import re
 
 
 
@@ -103,9 +103,9 @@ else:
                                     break
                                 else:
                                     continue
-                            g.graph['Application_info']['ApplicationStatus'][appID]=1
+                            g.graph['Application_info'].loc[appID,'ApplicationStatus'] = 1
                             Uptime[appID] = x['EvolTime'][0]
-                            g.graph['Application_info']['ApplicationUnavilTime'][appID] += (Uptime[appID]-Downtime[appID])
+                            g.graph['Application_info'].loc[appID,'ApplicationUnavilTime'] += (Uptime[appID]-Downtime[appID])
         # 故障节点集怎么操作，对这个集合下的所有节点操作x['EvolFailNodesSet']
             # DCGW/EOR/TOR
             # Server
@@ -139,12 +139,12 @@ else:
                                         for appID, statu in g.graph['Application_info']['ApplicationStatus'].items():
                                             if statu == 0:
                                                 continue
-                                            if statu == 1:
+                                            if statu == 1: 
                                                 services = g.graph['Application_info']['ApplicationServices'][appID]
                                                 services = services.replace("[",'').replace("]",'')
                                                 services = services.split(',')
                                                 if (g.graph['Service_info']['ServiceID'][j] in services):
-                                                    g.graph['Application_info']['ApplicationStatus'][appID]=0
+                                                    g.graph['Application_info'].loc[appID,'ApplicationStatus']=0
                                                     Downtime[appID] = x['EvolTime'][0]
                                                 else:
                                                     continue
@@ -158,15 +158,15 @@ else:
                                         VNFs = VNFs.replace("[",'').replace("]",'')
                                         VNFs = VNFs.split(',')
                                         if (g.graph['VNF_info']['VNFID'][i] in VNFs):#寻找该VNF上的Server
-                                            for appID, statu in g.graph['Application_info']['ApplicationStatus'].item():
+                                            for appID, statu in g.graph['Application_info']['ApplicationStatus'].items():
                                                 if statu == 0:
                                                     continue
                                                 if statu == 1:
-                                                    services = g.graph['Application_info']['ApplicationServices'][appID]
+                                                    services = g.graph['Application_info']['ApplicationService'][appID]
                                                     services = services.replace("[",'').replace("]",'')
                                                     services = services.split(',')
-                                                    if (g.graph['Service_info']['ServiceID'][j] in services):#遍历Server上的业务
-                                                        g.graph['Application_info']['ApplicationStatus'][appID]=0
+                                                    if (g.graph['Service_info'].index[j] in services):#遍历Server上的业务
+                                                        g.graph['Application_info'].loc[appID,'ApplicationStatus'] = 0
                                                         Downtime[appID] = x['EvolTime'][0]
                                                     else:
                                                         continue
@@ -174,11 +174,8 @@ else:
                                         else:
                                             continue
                                 else:#备用路径没有中断，VNF进行主备倒换
-                                    # a = g.graph['VNF_info']['VNFDeployNode'][i]
                                     a = g.graph['VNF_info'].loc[i,'VNFDeployNode']
-                                    # g.graph['VNF_info']['VNFDeployNode'][i] = g.graph['VNF_info']['VNFBackupNode'][i]
                                     g.graph['VNF_info'].loc[i,'VNFDeployNode'] = g.graph['VNF_info'].loc[i,'VNFBackupNode']
-                                    # g.graph['VNF_info']['VNFBackupNode'][i] = a
                                     g.graph['VNF_info'].loc[i,'VNFBackupNode'] = a
                                     for j in range(len(g.graph['Service_info'])):
                                         VNFs = g.graph['Service_info']['ServiceVNF'][j]
@@ -189,14 +186,15 @@ else:
                                                 if statu == 0:
                                                     continue
                                                 if statu == 1:
-                                                    services = g.graph['Application_info']['ApplicationServices'][appID]
+                                                    services = g.graph['Application_info']['ApplicationService'][appID]
                                                     services = services.replace("[",'').replace("]",'')
                                                     services = services.split(',')
-                                                    if (g.graph['Service_info']['ServiceID'][j] in services):#遍历Server上的业务
+                                                    if (g.graph['Service_info'].index[j] in services):#遍历Server上的业务
                                                         #将倒换时间加到业务不可用时间上
-                                                        g.graph['Application_info']['ApplicationUnavilTime'][appID] += g.graph['VNF_info']['VNFFailST'][i]
+                                                        s = re.findall("\d+", g.graph['VNF_info']['VNFFailST'][i])
+                                                        g.graph['Application_info'].loc[appID,'ApplicationUnavailTime']  += (float(s[0])/60)
                                                         #更改业务工作路径
-                                                        g.graph['Application_info']['ApplicationWorkPath'][appID] = g.graph['Application_info']['ApplicationWorkPath'][appID].replace(g.graph['VNF_info']['VNFBackupNode'][i],g.graph['VNF_info']['VNFDeployNode'][i])
+                                                        g.graph['Application_info'].loc[appID,'ApplicationWorkPath'] = g.graph['Application_info']['ApplicationWorkPath'][appID].replace(g.graph['VNF_info']['VNFBackupNode'][i],g.graph['VNF_info']['VNFDeployNode'][i])
                                                     else:
                                                         continue
                                         else:
