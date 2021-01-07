@@ -5,12 +5,13 @@ Created on Thu Dec 31 05:36:15 2020
 @author: zhujuxing
 """
 
-import networkx as nx
+# import networkx as nx
 import pickle
 import pandas as pd
 import random
 import math
 import re
+import os
 
 
 
@@ -260,10 +261,13 @@ def net_evo_con_gen(Gpath, T):
     evol = Con_gen()
     return evol
 
-if __name__ == '__main__':
+def test():
     # 仿真时间100年，单位小时
     T = 100
-    Gpath = 'g.gpickle'
+    Gpath = os.getcwd()+os.sep+'test'+os.sep+'g.gpickle'
     
     print(net_evo_con_gen(Gpath, T))
-    evol.to_excel('evol.xls')
+    # evol.to_excel('evol.xls')
+    
+if __name__ == '__main__':
+    test()

@@ -231,11 +231,6 @@ def net_evo_rul_ana(G,evol,Uptime,Downtime)->nx.Graph:
                                         pass
 
 
-
-
-
-
-
                 evol.apply(rul_ana,axis=1)
 
                 return G_T
@@ -273,5 +268,7 @@ def test():
 
     pass
 
+
+
 if __name__ == '__main__':
-    test()
+    test1()
