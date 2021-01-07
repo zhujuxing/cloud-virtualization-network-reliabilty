@@ -92,7 +92,7 @@ def fail_state(x):
                 t_hr = -math.log(delta) * MTTR
                 if random.random() < FDR:
                     t_r = FDT
-                    if row[1]['NodeType'] == 'Server'or'DCGW'or'TOR':
+                    if row[1]['NodeType'] in ('Server', 'DCGW', 'TOR'):
                         t_r += u_asp + t_hr
                     else:
                         if random.random() < AFRR:
@@ -111,7 +111,7 @@ def fail_state(x):
                             else:
                                break
                 else:
-                    if row[1]['NodeType'] == 'Server'or'DCGW'or'TOR':
+                    if row[1]['NodeType'] in ('Server', 'DCGW', 'TOR'):
                        t_r = u_chk
                     else:
                        t_r = u_chk
