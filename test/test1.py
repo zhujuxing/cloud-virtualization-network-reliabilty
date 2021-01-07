@@ -114,6 +114,7 @@ else:
         x['EvolFailNodesSet'] = x['EvolFailNodesSet'].replace("[",'').replace("]",'')
         x['EvolFailNodesSet'] = x['EvolFailNodesSet'].split(',')
         for FailNode in x['EvolFailNodesSet']:#遍历演化态下的故障节点集
+             FailNode_name = FailNode
              FailNode = list(FailNode)
              if len(FailNode) !=0:
                
@@ -128,7 +129,7 @@ else:
                         nodes = g.graph['VNF_info']['VNFDeployNode'][i]
                         nodes = nodes.replace("[",'').replace("]",'')
                         nodes = nodes.split(',')
-                        if (FailNode in nodes):
+                        if (FailNode_name in nodes):
                             if g.graph['VNF_info']['VNFBackupType'][i] == '主机':
                                 for j in range(len(g.graph['Service_info'])):
                                     VNFs = g.graph['Service_info']['ServiceVNF'][j]
@@ -173,9 +174,12 @@ else:
                                         else:
                                             continue
                                 else:#备用路径没有中断，VNF进行主备倒换
-                                    a = g.graph['VNF_info']['VNFDeployNode'][i]
-                                    g.graph['VNF_info']['VNFDeployNode'][i] = g.graph['VNF_info']['VNFBackupNode'][i]
-                                    g.graph['VNF_info']['VNFBackupNode'][i] = a
+                                    # a = g.graph['VNF_info']['VNFDeployNode'][i]
+                                    a = g.graph['VNF_info'].loc[i,'VNFDeployNode']
+                                    # g.graph['VNF_info']['VNFDeployNode'][i] = g.graph['VNF_info']['VNFBackupNode'][i]
+                                    g.graph['VNF_info'].loc[i,'VNFDeployNode'] = g.graph['VNF_info'].loc[i,'VNFBackupNode']
+                                    # g.graph['VNF_info']['VNFBackupNode'][i] = a
+                                    g.graph['VNF_info'].loc[i,'VNFBackupNode'] = a
                                     for j in range(len(g.graph['Service_info'])):
                                         VNFs = g.graph['Service_info']['ServiceVNF'][j]
                                         VNFs = VNFs.replace("[",'').replace("]",'')

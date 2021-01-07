@@ -8,7 +8,11 @@ Created on Thu Dec 31 05:37:33 2020
 
 import networkx as nx
 import pandas as pd
-import NetEvoObjMod.net_evo_obj_mod
+import NetEvoObjMod
+import NetEvoConGen
+import NetEvoRulAna
+import os
+
 
 def app_ava_cal(file,T,N):
     """
@@ -31,14 +35,21 @@ def app_ava_cal(file,T,N):
         DESCRIPTION.
 
     """
+    
+    
     single_app_avail = pd.DataFrame()
     whole_app_avail = 0.0
-    
-    return single_app_avail, whole_app_avail
+    g = NetEvoObjMod.net_evo_obj_mod(file)
+    evol = NetEvoConGen.net_evo_con_gen(g,T)
+    # return single_app_avail, whole_app_avail
+    return evol
     
 
 def test():
-    pass
+    T = 100
+    N = 10
+    file = os.getcwd()+os.sep+'test'+os.sep+'file.xlsx'
+    return app_ava_cal(file,T,N)
 
 if __name__ == '__main__':
-    test()
+    e = test()

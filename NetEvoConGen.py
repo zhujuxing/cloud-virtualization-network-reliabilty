@@ -5,7 +5,7 @@ Created on Thu Dec 31 05:36:15 2020
 @author: zhujuxing
 """
 
-# import networkx as nx
+import networkx as nx
 import pickle
 import pandas as pd
 import random
@@ -22,8 +22,12 @@ def init(Gpath, Tset):
     global T
     T = Tset*365*24
     # gpickle转换成DataFrame
-    with open(Gpath, 'rb') as fo:
-        G = pickle.load(fo, encoding='bytes')
+    if type(Gpath) == str:
+        with open(Gpath, 'rb') as fo:
+            G = pickle.load(fo, encoding='bytes')
+
+    elif type(Gpath) == nx.Graph:
+        G = Gpath
     global df, node_info, u_asp, u_chk
     df = pd.DataFrame([turple[1] for turple in G.nodes(data=True)])
     df.insert(0, 'NodeID', [turple[0] for turple in G.nodes(data=True)])
@@ -34,8 +38,9 @@ def init(Gpath, Tset):
     
     u_asp = node_info.loc[1, 'Tasp']
     u_chk = node_info.loc[1, 'Tchk']
-
-
+    
+    
+    
 def convert(x):
     '''
     转换数据格式，年、min-->小时
@@ -280,7 +285,7 @@ def test():
     # 仿真时间100年，单位小时
     T = 100
     Gpath = os.getcwd()+os.sep+'test'+os.sep+'g.gpickle'
-    
+    # Gpath = g
     print(net_evo_con_gen(Gpath, T))
     # evol.to_excel('evol.xlsx')
     
