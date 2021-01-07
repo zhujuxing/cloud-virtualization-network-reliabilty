@@ -8,7 +8,7 @@ Created on Thu Dec 31 05:36:41 2020
 import networkx as nx
 import pandas as pd
 import xlrd
-
+import re
 
 
 
@@ -114,6 +114,7 @@ else:
         x['EvolFailNodesSet'] = x['EvolFailNodesSet'].replace("[",'').replace("]",'')
         x['EvolFailNodesSet'] = x['EvolFailNodesSet'].split(',')
         for FailNode in x['EvolFailNodesSet']:#遍历演化态下的故障节点集
+             FailNode_name = FailNode
              FailNode = list(FailNode)
              if len(FailNode) !=0:
                
@@ -128,7 +129,7 @@ else:
                         nodes = g.graph['VNF_info']['VNFDeployNode'][i]
                         nodes = nodes.replace("[",'').replace("]",'')
                         nodes = nodes.split(',')
-                        if (FailNode in nodes):
+                        if (FailNode_name in nodes):
                             if g.graph['VNF_info']['VNFBackupType'][i] == '主机':
                                 for j in range(len(g.graph['Service_info'])):
                                     VNFs = g.graph['Service_info']['ServiceVNF'][j]
@@ -143,7 +144,7 @@ else:
                                                 services = services.replace("[",'').replace("]",'')
                                                 services = services.split(',')
                                                 if (g.graph['Service_info']['ServiceID'][j] in services):
-                                                    g.graph['Application_info']['ApplicationStatus'][appID]=0
+                                                    g.graph['Application_info'].loc['appID','ApplicationStatus']=0
                                                     Downtime[appID] = x['EvolTime'][0]
                                                 else:
                                                     continue
@@ -157,14 +158,14 @@ else:
                                         VNFs = VNFs.replace("[",'').replace("]",'')
                                         VNFs = VNFs.split(',')
                                         if (g.graph['VNF_info']['VNFID'][i] in VNFs):#寻找该VNF上的Server
-                                            for appID, statu in g.graph['Application_info']['ApplicationStatus'].item():
+                                            for appID, statu in g.graph['Application_info']['ApplicationStatus'].items():
                                                 if statu == 0:
                                                     continue
                                                 if statu == 1:
-                                                    services = g.graph['Application_info']['ApplicationServices'][appID]
+                                                    services = g.graph['Application_info']['ApplicationService'][appID]
                                                     services = services.replace("[",'').replace("]",'')
                                                     services = services.split(',')
-                                                    if (g.graph['Service_info']['ServiceID'][j] in services):#遍历Server上的业务
+                                                    if (g.graph['Service_info'].index[j] in services):#遍历Server上的业务
                                                         g.graph['Application_info']['ApplicationStatus'][appID]=0
                                                         Downtime[appID] = x['EvolTime'][0]
                                                     else:
@@ -173,9 +174,9 @@ else:
                                         else:
                                             continue
                                 else:#备用路径没有中断，VNF进行主备倒换
-                                    a = g.graph['VNF_info']['VNFDeployNode'][i]
-                                    g.graph['VNF_info']['VNFDeployNode'][i] = g.graph['VNF_info']['VNFBackupNode'][i]
-                                    g.graph['VNF_info']['VNFBackupNode'][i] = a
+                                    a = g.graph['VNF_info'].loc[i,'VNFDeployNode']
+                                    g.graph['VNF_info'].loc[i,'VNFDeployNode'] = g.graph['VNF_info'].loc[i,'VNFBackupNode']
+                                    g.graph['VNF_info'].loc[i,'VNFBackupNode'] = a
                                     for j in range(len(g.graph['Service_info'])):
                                         VNFs = g.graph['Service_info']['ServiceVNF'][j]
                                         VNFs = VNFs.replace("[",'').replace("]",'')
@@ -185,12 +186,13 @@ else:
                                                 if statu == 0:
                                                     continue
                                                 if statu == 1:
-                                                    services = g.graph['Application_info']['ApplicationServices'][appID]
+                                                    services = g.graph['Application_info']['ApplicationService'][appID]
                                                     services = services.replace("[",'').replace("]",'')
                                                     services = services.split(',')
-                                                    if (g.graph['Service_info']['ServiceID'][j] in services):#遍历Server上的业务
+                                                    if (g.graph['Service_info'].index[j] in services):#遍历Server上的业务
                                                         #将倒换时间加到业务不可用时间上
-                                                        g.graph['Application_info']['ApplicationUnavilTime'][appID] += g.graph['VNF_info']['VNFFailST'][i]
+                                                        s = re.findall("\d+", g.graph['VNF_info']['VNFFailST'][i])
+                                                        g.graph['Application_info']['ApplicationUnavailTime'][appID]  += float(s[0])
                                                         #更改业务工作路径
                                                         g.graph['Application_info']['ApplicationWorkPath'][appID] = g.graph['Application_info']['ApplicationWorkPath'][appID].replace(g.graph['VNF_info']['VNFBackupNode'][i],g.graph['VNF_info']['VNFDeployNode'][i])
                                                     else:
