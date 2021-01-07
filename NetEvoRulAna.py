@@ -133,7 +133,7 @@ def net_evo_rul_ana(G,evol,Uptime,Downtime)->nx.Graph:
                     # Server
                     #VSwitch
                     # VM
-                                    
+
 
 
                 x['EvolFailNodesSet'] = x['EvolFailNodesSet'].replace("[",'').replace("]",'')
@@ -152,48 +152,48 @@ def net_evo_rul_ana(G,evol,Uptime,Downtime)->nx.Graph:
                             pass
 
                         if FailNode[0] == 'VM':#故障节点为VM
-                            for i in range(len(g.graph['VNF_info'])):
-                                nodes = g.graph['VNF_info']['VNFDeployNode'][i][1]
+                            for i in range(len(G_T.graph['VNF_info'])):
+                                nodes = G_T.graph['VNF_info']['VNFDeployNode'][i][1]
                                 nodes = nodes.replace("[",'').replace("]",'')
                                 nodes = nodes.split(',')
                                 if (FailNode in nodes):
-                                    if g.graph['VNF_info']['VNFBackupType'][i] == '主机':
-                                        for j in range(len(g.graph['Service_info'])):
-                                            VNFs = g.graph['Service_info']['ServiceVNF'][j]
+                                    if G_T.graph['VNF_info']['VNFBackupType'][i] == '主机':
+                                        for j in range(len(G_T.graph['Service_info'])):
+                                            VNFs = G_T.graph['Service_info']['ServiceVNF'][j]
                                             VNFs = VNFs.replace("[",'').replace("]",'')
                                             VNFs = VNFs.split(',')
-                                            if (g.graph['VNF_info']['VNFID'][i] in VNFs):
-                                                for appID, status in g.graph['Application_info']['applicationStatus'].item():
+                                            if (G_T.graph['VNF_info']['VNFID'][i] in VNFs):
+                                                for appID, status in G_T.graph['Application_info']['applicationStatus'].item():
                                                     if status == 0:
                                                         continue
                                                     if status == 1:
-                                                        services = g.graph['Application_info']['applicationServices'][appID]
+                                                        services = G_T.graph['Application_info']['applicationServices'][appID]
                                                         services = services.replace("[",'').replace("]",'')
                                                         services = services.split(',')
-                                                        if (g.graph['Service_info']['ServiceID'][j] in services):
-                                                            g.graph['Application_info']['applicationStatus'][appID]=0
+                                                        if (G_T.graph['Service_info']['ServiceID'][j] in services):
+                                                            G_T.graph['Application_info']['applicationStatus'][appID]=0
                                                             Downtime[appID] = x['time']
                                                         else:
                                                             continue
                                             else:
                                                 continue
 
-                                    if g.graph['VNF_info']['VNFBackupType'][i] == '主备':
-                                        if (g.graph['VNF_info']['VNFBackupNode'][i] in x['EvolFailNodesSet']):#备用路径中断，记录下此时的故障时间
-                                            for j in range(len(g.graph['Service_info'])):
-                                                VNFs = g.graph['Service_info']['ServiceVNF'][j]
+                                    if G_T.graph['VNF_info']['VNFBackupType'][i] == '主备':
+                                        if (G_T.graph['VNF_info']['VNFBackupNode'][i] in x['EvolFailNodesSet']):#备用路径中断，记录下此时的故障时间
+                                            for j in range(len(G_T.graph['Service_info'])):
+                                                VNFs = G_T.graph['Service_info']['ServiceVNF'][j]
                                                 VNFs = VNFs.replace("[",'').replace("]",'')
                                                 VNFs = VNFs.split(',')
-                                                if (g.graph['VNF_info']['VNFID'][i] in VNFs):#寻找该VNF上的Server
-                                                    for appID, status in g.graph['Application_info']['applicationStatus'].item():
+                                                if (G_T.graph['VNF_info']['VNFID'][i] in VNFs):#寻找该VNF上的Server
+                                                    for appID, status in G_T.graph['Application_info']['applicationStatus'].item():
                                                         if status == 0:
                                                             continue
                                                         if status == 1:
-                                                            services = g.graph['Application_info']['applicationServices'][appID]
+                                                            services = G_T.graph['Application_info']['applicationServices'][appID]
                                                             services = services.replace("[",'').replace("]",'')
                                                             services = services.split(',')
-                                                            if (g.graph['Service_info']['ServiceID'][j] in services):#遍历Server上的业务
-                                                                g.graph['Application_info']['applicationStatus'][appID]=0
+                                                            if (G_T.graph['Service_info']['ServiceID'][j] in services):#遍历Server上的业务
+                                                                G_T.graph['Application_info']['applicationStatus'][appID]=0
                                                                 Downtime[appID] = x['time']
                                                             else:
                                                                 continue
@@ -201,26 +201,26 @@ def net_evo_rul_ana(G,evol,Uptime,Downtime)->nx.Graph:
                                                 else:
                                                     continue
                                         else:#备用路径没有中断，VNF进行主备倒换
-                                            a = g.graph['VNF_info']['VNFDeployNode'][i]
-                                            g.graph['VNF_info']['VNFDeployNode'][i] = g.graph['VNF_info']['VNFBackupNode'][i]
-                                            g.graph['VNF_info']['VNFBackupNode'][i] = a
-                                            for j in range(len(g.graph['Service_info'])):
-                                                VNFs = g.graph['Service_info']['ServiceVNF'][j]
+                                            a = G_T.graph['VNF_info']['VNFDeployNode'][i]
+                                            G_T.graph['VNF_info']['VNFDeployNode'][i] = G_T.graph['VNF_info']['VNFBackupNode'][i]
+                                            G_T.graph['VNF_info']['VNFBackupNode'][i] = a
+                                            for j in range(len(G_T.graph['Service_info'])):
+                                                VNFs = G_T.graph['Service_info']['ServiceVNF'][j]
                                                 VNFs = VNFs.replace("[",'').replace("]",'')
                                                 VNFs = VNFs.split(',')
-                                                if (g.graph['VNF_info']['VNFID'][i] in VNFs):#寻找该VNF上的Server
-                                                    for appID, status in g.graph['Application_info']['applicationStatus'].item():
+                                                if (G_T.graph['VNF_info']['VNFID'][i] in VNFs):#寻找该VNF上的Server
+                                                    for appID, status in G_T.graph['Application_info']['applicationStatus'].item():
                                                         if status == 0:
                                                             continue
                                                         if status == 1:
-                                                            services = g.graph['Application_info']['applicationServices'][appID]
+                                                            services = G_T.graph['Application_info']['applicationServices'][appID]
                                                             services = services.replace("[",'').replace("]",'')
                                                             services = services.split(',')
-                                                            if (g.graph['Service_info']['ServiceID'][j] in services):#遍历Server上的业务
+                                                            if (G_T.graph['Service_info']['ServiceID'][j] in services):#遍历Server上的业务
                                                                 #将倒换时间加到业务不可用时间上
-                                                                g.graph['Application_info']['applicationUnavilTime'][appID] += g.graph['VNF_info']['VNFFailST'][i]
+                                                                G_T.graph['Application_info']['applicationUnavilTime'][appID] += G_T.graph['VNF_info']['VNFFailST'][i]
                                                                 #更改业务工作路径
-                                                                g.graph['Application_info']['applicationWorkPath'][appID] = g.graph['Application_info']['applicationWorkPath'][appID].replace(g.graph['VNF_info']['VNFBackupNode'][i],g.graph['VNF_info']['VNFDeployNode'][i])
+                                                                G_T.graph['Application_info']['applicationWorkPath'][appID] = G_T.graph['Application_info']['applicationWorkPath'][appID].replace(G_T.graph['VNF_info']['VNFBackupNode'][i],G_T.graph['VNF_info']['VNFDeployNode'][i])
                                                             else:
                                                                 continue
                                                 else:
@@ -228,6 +228,7 @@ def net_evo_rul_ana(G,evol,Uptime,Downtime)->nx.Graph:
 
 
                                     else:#Nway型VNF
+                                        pass
 
 
 
