@@ -236,6 +236,19 @@ def Con_gen():
     EvolTime.append(T-time_set[-1])
     evol.columns=['EvolFailNodesSet', 'EvolRecoNodesSet']
     evol.insert(0, 'EvolTime' ,EvolTime)
+    # return evol
+
+def formating_data():
+    t = 0
+    global evol
+    def time_add(x):
+        nonlocal t
+        result = str([t,t+x])
+        t += x
+        return result
+    evol['EvolTime'] = evol['EvolTime'].apply(time_add)
+    # evol['EvolFailNodesSet'] = evol['EvolFailNodesSet'].apply(lambda x:str(x))
+    # evol['EvolRecoNodesSet'] = evol['EvolRecoNodesSet'].apply(lambda x:str(x))
     return evol
 
 def net_evo_con_gen(Gpath, T):
@@ -258,7 +271,9 @@ def net_evo_con_gen(Gpath, T):
     singleFR()
     common_ex()
     time_set_gen()
-    evol = Con_gen()
+    # evol = Con_gen()
+    Con_gen()
+    evol = formating_data()
     return evol
 
 def test():
@@ -267,7 +282,7 @@ def test():
     Gpath = os.getcwd()+os.sep+'test'+os.sep+'g.gpickle'
     
     print(net_evo_con_gen(Gpath, T))
-    # evol.to_excel('evol.xls')
+    # evol.to_excel('evol.xlsx')
     
 if __name__ == '__main__':
     test()

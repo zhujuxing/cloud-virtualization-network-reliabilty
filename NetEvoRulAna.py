@@ -14,7 +14,7 @@ import xlrd
 
 Uptime = {}#创建一个空字典，记录业务从故障状态转换到正常状态的时刻
 Downtime = {}#创建一个空字典，记录业务从正常状态转换到故障状态的时刻
-def net_evo_rul_ana(G,evol,Uptime,Downtime)->nx.Graph:
+def net_evo_rul_ana(G,evol)->nx.Graph:
     """
 
 
@@ -31,6 +31,8 @@ def net_evo_rul_ana(G,evol,Uptime,Downtime)->nx.Graph:
         经过T时间后的网络演化对象模型
 
     """
+    Downtime = {}
+    Uptime = {}
     fname = 'evol.xlsx'
     bk = xlrd.open_workbook(fname)
     #获取当前文档的表
@@ -268,7 +270,9 @@ def test():
 
     pass
 
+# def test1():
+
 
 
 if __name__ == '__main__':
-    test1()
+    test()
