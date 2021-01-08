@@ -12,14 +12,14 @@ import random
 import math
 import re
 import os
-
+import time
 
 
 def init(Gpath, Tset):
     '''
     读取gpickle.Gpath表示gpickle路径，Tset表示演化时长
     '''
-    global T
+    # global T
     T = Tset*365*24
     # gpickle转换成DataFrame
     if type(Gpath) == str:
@@ -28,7 +28,7 @@ def init(Gpath, Tset):
 
     elif type(Gpath) == nx.Graph:
         G = Gpath
-    global df, node_info, u_asp, u_chk
+    # global df, node_info, u_asp, u_chk
     df = pd.DataFrame([turple[1] for turple in G.nodes(data=True)])
     df.insert(0, 'NodeID', [turple[0] for turple in G.nodes(data=True)])
     
@@ -38,6 +38,8 @@ def init(Gpath, Tset):
     
     u_asp = node_info.loc[1, 'Tasp']
     u_chk = node_info.loc[1, 'Tchk']
+    
+    return T,df,node_info,u_asp,u_chk
     
     
     
@@ -61,7 +63,7 @@ def convert(x):
         return x
 
 
-def fail_state(x):
+def fail_state(x,T,df,u_asp,u_chk):
     '''
     单个构件、单个模式生成状态
     Parameters
@@ -90,9 +92,7 @@ def fail_state(x):
         AFRT = convert(row[1]['NodeFailAFDT'])
         MTTR = convert(row[1]['NodeFailMTTR'])
         while True:
-            if t>T:
-                break
-            else:
+            if t<=T:
                 delta = random.random()
                 t_f  = -math.log(delta) * MTBF
                 t_hr = -math.log(delta) * MTTR
@@ -142,22 +142,24 @@ def fail_state(x):
                 else:
                     break
                 t = t + t_f + t_r
+            else: break
         i += 1
     return fail_time, reco_time
 
 
-def singleFR():
+def singleFR(node_info,T,df,u_asp,u_chk):
     '''
     生成单个构件单个故障
     '''
-    temp = node_info.apply(fail_state, axis=1)
+    temp = node_info.apply(lambda x:fail_state(x,T,df,u_asp,u_chk), axis=1)
     
     node_info['FailureTime'] = temp.apply(lambda x: x[0]) 
     node_info['RepairTime'] = temp.apply(lambda x: x[1]) 
 
-    global node_info1
+    # global node_info1
     # 节点列属性添加失效、修复时间，属性值为[时间点列表]。
     node_info1 = node_info.copy()
+    return node_info1
 
 
 def common_failure(x):
@@ -175,7 +177,7 @@ def common_failure(x):
     return fail_time, reco_time
 
 
-def common_ex():
+def common_ex(node_info1):
     '''
     合并单个构件时间点
     '''
@@ -184,35 +186,39 @@ def common_ex():
     # 拆分temp
     node_info1['FailureTime'] = temp.apply(lambda x: x[0]) 
     node_info1['RepairTime'] = temp.apply(lambda x: x[1]) 
+    return node_info1
 
 
-def time_set_gen():
+def time_set_gen(node_info1):
     '''
     生成time_set
 
     '''
-    global time_set
+    # global time_set
     time_set = set([])
     for i in node_info1['FailureTime']: time_set = time_set | set(i)
     for i in node_info1['RepairTime']: time_set = time_set | set(i)
     time_set = [i for i in time_set]
     time_set.sort()
 
-    print('演化态共有个%d'%len(time_set))
+    print('演化态共有%d个'%len(time_set))
+    return time_set
 
 
 
-def Con_gen():
+def Con_gen(node_info1,T,time_set):
     '''
     生成演化态
     '''
-    global evol
+    # global evol
+    # i=0
     t = 0
     a = node_info1['FailureTime'].to_list()
     b = node_info1['RepairTime'].to_list()
     all_fall_edge_set = []
-    all_recover_edge_set = []
-    while t < time_set[-1]:
+    all_recover_edge_set = []   
+    while t <= T:
+        # print(t)
         fail_time_list = [i[0] if i != [] else T for i in a]
                                                 # 记录当前边状态改变(故障)的最先时间
         recover_time_list = [i[0] if i != [] else T for i in b]
@@ -232,20 +238,32 @@ def Con_gen():
             t = recover_time
             b[recover_node_index] = b[recover_node_index][1:]
             # edges_info1.loc[recover_edge,'维修开始时间'] = edges_info1.loc[recover_edge,'维修开始时间'][1:]
+        else:
+            break 
         all_fall_edge_set.append(fail_set)
         all_recover_edge_set.append(recover_set)
+        
+        # i += 1
+        # if t == time_set[-1]:
+        #     break
+        # if i>300:
+        #     continue
     evol = pd.DataFrame([all_fall_edge_set,all_recover_edge_set])
     evol = evol.T
-    
+
     EvolTime = [time_set[i+1]-time_set[i] for i in range(len(time_set)-1)]
     EvolTime.append(T-time_set[-1])
     evol.columns=['EvolFailNodesSet', 'EvolRecoNodesSet']
-    evol.insert(0, 'EvolTime' ,EvolTime)
+    try :
+        evol.insert(0, 'EvolTime' ,EvolTime)
+    except:
+        evol.insert(0, 'EvolTime' ,EvolTime[:len(evol)])
     # return evol
+    return evol
 
-def formating_data():
+def formating_data(evol):
     t = 0
-    global evol
+    # global evol
     def time_add(x):
         nonlocal t
         result = str([t,t+x])
@@ -272,22 +290,25 @@ def net_evo_con_gen(Gpath, T):
         列值：各该时间区间对应的构件名称NodeID列表.
 
     """
-    init(Gpath, T)
-    singleFR()
-    common_ex()
-    time_set_gen()
+    T,df,node_info,u_asp,u_chk=init(Gpath, T)
+    node_info1 = singleFR(node_info,T,df,u_asp,u_chk)
+    node_info1 = common_ex(node_info1)
+    time_set = time_set_gen(node_info1)
     # evol = Con_gen()
-    Con_gen()
-    evol = formating_data()
+    evol = Con_gen(node_info1,T,time_set)
+    evol = formating_data(evol)
     return evol
 
 def test():
     # 仿真时间100年，单位小时
+    t_start = time.time()
     T = 100
     Gpath = os.getcwd()+os.sep+'test'+os.sep+'g.gpickle'
     # Gpath = g
-    print(net_evo_con_gen(Gpath, T))
-    # evol.to_excel('evol.xlsx')
+    evol = net_evo_con_gen(Gpath, T)
+    evol.to_excel('evol.xlsx')
+    t_end = time.time()
+    print(t_end-t_start)
     
 if __name__ == '__main__':
     test()

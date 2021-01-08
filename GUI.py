@@ -10,17 +10,31 @@ import tkinter as tk
 
 
 def makeform(root, pars):
-   entries = []
-   for field in pars:
-      row = tk.Frame(root)
-      lab = tk.Label(row, width=16, text=field, anchor='w')
-      ent = tk.Entry(row)
-      row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5,expand=tk.YES)
-      # row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
-      lab.pack(side=tk.LEFT)
-      ent.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
-      entries.append((field, ent))
-   return entries
+    '''
+    该函数为一个制造若干列label与entry控件的函数。
+
+    Parameters
+    ----------
+    root : 父控件类型
+    pars : 每列Label的文字内容。
+
+    Returns
+    -------
+    entries : List
+        DESCRIPTION.
+
+    '''
+    entries = []
+    for field in pars:
+       row = tk.Frame(root)
+       lab = tk.Label(row, width=16, text=field, anchor='w')
+       ent = tk.Entry(row)
+       row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5,expand=tk.YES)
+       # row.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
+       lab.pack(side=tk.LEFT)
+       ent.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.X)
+       entries.append((field, ent))
+    return entries
 
 def cal_single_app_avail(e):
     pass
@@ -70,10 +84,10 @@ if __name__ == '__main__':
     frame_out = tk.LabelFrame(frame_right,text='输出面板')
     frame_out.pack(side=tk.TOP,fill=tk.X)
     
-    label_result_sig = tk.Label(frame_out,width=50,text='单业务可靠度计算结果')
+    label_result_sig = tk.Label(frame_out,width=52,text='单业务可靠度计算结果')
     label_result_sig.pack(side=tk.TOP)
     
-    text_result_sig = tk.Text(frame_out,width=50,height=6)
+    text_result_sig = tk.Text(frame_out,width=52,height=6)
     text_result_sig.pack(side=tk.TOP)
     # text_result_sig.insert('insert','111')
     
@@ -83,7 +97,7 @@ if __name__ == '__main__':
     label_result_mul = tk.Label(frame_out_mul,width=25,text='多业务可靠度计算结果')
     label_result_mul.pack(side=tk.LEFT)
     
-    text_result_mul = tk.Text(frame_out_mul,width=25,height=1)
+    text_result_mul = tk.Text(frame_out_mul,width=26,height=1)
     text_result_mul.pack(side=tk.LEFT)
 
     root.mainloop()
