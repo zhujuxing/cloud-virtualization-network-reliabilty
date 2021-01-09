@@ -100,6 +100,7 @@ def net_evo_obj_mod(file)->nx.Graph:
     Application_info['ApplicationThreshold'] = 0
     Application_info = Application_info.set_index('ApplicationID')
     # 计算业务物理路径
+    Application_info['ApplicationDownTime'] = 0
     Application_info['ApplicationWorkPath'] = str([])
     
     Service_info = Service_info.rename(columns={'Service名称':'ServiceID',

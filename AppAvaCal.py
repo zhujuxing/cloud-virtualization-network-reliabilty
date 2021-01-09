@@ -8,6 +8,7 @@ Created on Thu Dec 31 05:37:33 2020
 
 import networkx as nx
 import pandas as pd
+import numpy as np
 import NetEvoObjMod
 import NetEvoConGen
 import NetEvoRulAna
@@ -37,19 +38,24 @@ def app_ava_cal(file,T,N):
     """
     
     
-    single_app_avail = pd.DataFrame()
+    single_app_avail = pd.DataFrame(columns=[i+1 for i in range(N)])
     whole_app_avail = 0.0
     g = NetEvoObjMod.net_evo_obj_mod(file)
-    evol = NetEvoConGen.net_evo_con_gen(g,T)
+    for i in range(N):
+        evol = NetEvoConGen.net_evo_con_gen(g,T)
+        g_T= NetEvoRulAna.net_evo_rul_ana_test(g,evol) # 修改net_evo_rul_ana_test为正式版函数名
+        single_app_avail[i+1] = g_T.graph['Application_info']['ApplicationDownTime'].apply(lambda x:1-x/T)
+    single_app_avail['result'] = single_app_avail.apply(np.mean,axis = 1)
+    whole_app_avail = np.mean(single_app_avail['result'].to_list())
     # return single_app_avail, whole_app_avail
-    return evol
+    return single_app_avail,whole_app_avail
     
 
 def test():
-    T = 100
-    N = 10
+    T = 10
+    N = 2
     file = os.getcwd()+os.sep+'test'+os.sep+'file.xlsx'
     return app_ava_cal(file,T,N)
 
 if __name__ == '__main__':
-    e = test()
+    single_app_avail,whole_app_avail = test()

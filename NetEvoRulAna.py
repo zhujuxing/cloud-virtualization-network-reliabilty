@@ -10,7 +10,8 @@ import pandas as pd
 import xlrd
 
 
-
+def net_evo_rul_ana_test(g,evol):
+    return g
 
 Uptime = {}#创建一个空字典，记录业务从故障状态转换到正常状态的时刻
 Downtime = {}#创建一个空字典，记录业务从正常状态转换到故障状态的时刻
@@ -33,7 +34,7 @@ def net_evo_rul_ana(G,evol)->nx.Graph:
     """
     Downtime = {}
     Uptime = {}
-    fname = 'evol.xlsx'
+    fname = 'test/evol.xlsx'
     bk = xlrd.open_workbook(fname)
     #获取当前文档的表
     shxrange = range(bk.nsheets)
