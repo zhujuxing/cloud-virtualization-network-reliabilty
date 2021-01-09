@@ -9,5 +9,6 @@ import networkx as nx
 import pandas as pd
 # import re
 class Service():
+    pass
     
     

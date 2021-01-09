@@ -98,10 +98,12 @@ def net_evo_obj_mod(file)->nx.Graph:
     Application_info['ApplicationInitTraffic'] = 3.5
     Application_info['ApplicationTraffic'] = 1
     Application_info['ApplicationThreshold'] = 0
+    Application_info['ApplicationDownStartTime'] = 0
+    Application_info['ApplicationService'] = 'VNF2'
     Application_info = Application_info.set_index('ApplicationID')
     # 计算业务物理路径
     Application_info['ApplicationDownTime'] = 0
-    Application_info['ApplicationWorkPath'] = str([])
+    Application_info['ApplicationWorkPath'] = 'D1,T1,S1,V1,V2,V1,S1,T1,D1'
     
     Service_info = Service_info.rename(columns={'Service名称':'ServiceID',
                                                 'Service路径':'ServiceVNF'})
@@ -169,6 +171,7 @@ def show_edges_data(g):
 def test():
     file = os.getcwd()+os.sep+'test'+os.sep+'file.xlsx'
     g = net_evo_obj_mod(file)
+    nx.write_gpickle(g,'g.gpickle')
     return g
 
 if __name__ == '__main__':
