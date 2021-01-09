@@ -7,6 +7,7 @@ Created on Thu Dec 31 05:36:15 2020
 
 import networkx as nx
 import pandas as pd
+from VNF import VNF
 
 g = nx.read_gpickle('g.gpickle')
 evol = pd.read_excel('evol.xlsx',index_col=0,converters={})
@@ -33,19 +34,28 @@ def rul_ana(x):
     
 
     """
-    nonlocal g_T
+    # nonlocal g_T
+    
     # 判断是修复还是故障节点
     
     
     
-    # 修复节点怎么操作，对这个集合下的所有节点操作x['EvolRecoNodesSet']
-        # DCGW/EOR/TOR
-        # Server
-        # VM
+
     # 故障节点集怎么操作，对这个集合下的所有节点操作x['EvolFailNodesSet']
         # DCGW/EOR/TOR
+        
         # Server
+        
         # VM
+        
+        
+    # 修复节点怎么操作，对这个集合下的所有节点操作x['EvolRecoNodesSet']
+        # DCGW/EOR/TOR
+        
+        # Server
+        
+        # VM
+    pass
 
 def net_evo_rul_ana(g,evol)->nx.Graph:
     """
@@ -65,16 +75,25 @@ def net_evo_rul_ana(g,evol)->nx.Graph:
 
     """
     g_T = g.copy()
-
+    gps = g.graph['VNF_info'].groupby('VNFDataType')
+    NCE_nodes = list(map(lambda x:x.strip('[]'),gps.get_group('NCE')['VNFDeployNode'].to_list()))
+    DCGW_nodes = list(map(lambda x:x.strip('[]'),gps.get_group('DCGW')['VNFDeployNode'].to_list()))
+    VNF_data = gps.get_group('数据')
+    
+    VNFs = [VNF(x[1],NCE_nodes,DCGW_nodes) for x in VNF_data.iterrows()]
+    VNFs
+    
     evol.apply(rul_ana,axis=1)
     
     return g_T
     
 
 def test_rul_ana():
-    x = evol.iloc[0]
-    rul_ana(x)
-    return g_T
+    # x = evol.iloc[0]
+    # rul_ana(x)
+    # return g_T
+    
+    net_evo_rul_ana(g,evol)
 
 if __name__ == '__main__':
     test_rul_ana()
