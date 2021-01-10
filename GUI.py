@@ -6,9 +6,8 @@ Created on Thu Dec 31 05:33:55 2020
 """
 
 import tkinter as tk
+from tkinter.scrolledtext import ScrolledText
 import AppAvaCal
-
-
 
 def makeform(root, pars):
     '''
@@ -42,7 +41,9 @@ def cal_single_app_avail(e,t1,t2):
     T = int(e[1][1].get())
     N = int(e[2][1].get())
     sig_app_avail, mul_app_avail = AppAvaCal.app_ava_cal(file_path,T,N)
+    t1.delete(1.0, 'end')
     t1.insert('insert',sig_app_avail)
+    t2.delete(1.0,'end')
     t2.insert('insert',str(mul_app_avail))
     
 def cal_multi_app_avail(e):
@@ -60,7 +61,8 @@ D:\博士生资料\项目\2020.7 NFV项目\项目文档\程序\cloud-virtualizat
 if __name__ == '__main__':
     root = tk.Tk()
     root.title('基于网络演化的云化虚拟网络可靠性评估软件')
- 
+    # root.geometry("300x50+10+20")
+    
     sof_name = tk.Label(root,text='基于网络演化的云化虚拟网络可靠性评估软件')
     sof_name.pack(side=tk.TOP,fill=tk.X)
     
@@ -85,11 +87,20 @@ if __name__ == '__main__':
     frame_out = tk.LabelFrame(frame_right,text='输出面板')
     frame_out.pack(side=tk.TOP,fill=tk.X)
     
-    label_result_sig = tk.Label(frame_out,width=52,text='单业务可靠度计算结果')
+    frame_out_sig = tk.Frame(frame_out)
+    frame_out_sig.pack(side=tk.TOP)
+    
+    label_result_sig = tk.Label(frame_out_sig,width=52,text='单业务可靠度计算结果')
     label_result_sig.pack(side=tk.TOP)
     
-    text_result_sig = tk.Text(frame_out,width=52,height=6)
+    text_result_sig = ScrolledText(frame_out_sig,width=52,height=6)
     text_result_sig.pack(side=tk.TOP)
+    
+    # scroll_x = tk.Scrollbar()
+    # scroll_x.pack(side=tk.BOTTOM,fill=tk.X)
+    # scroll_x.config(command=text_result_sig.xview)
+    # text_result_sig.config(xscrollcommand=scroll_x.set)
+    
     # text_result_sig.insert('insert','111')
     
     frame_out_mul = tk.Frame(frame_out)

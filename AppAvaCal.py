@@ -42,9 +42,10 @@ def app_ava_cal(file,T,N):
     whole_app_avail = 0.0
     g = NetEvoObjMod.net_evo_obj_mod(file)
     for i in range(N):
-        evol = NetEvoConGen.net_evo_con_gen(g,T)
-        g_T= NetEvoRulAna.net_evo_rul_ana_test(g,evol) # 修改net_evo_rul_ana_test为正式版函数名
-        single_app_avail[i+1] = g_T.graph['Application_info']['ApplicationDownTime'].apply(lambda x:1-x/T)
+        g_T = g.copy()
+        evol = NetEvoConGen.net_evo_con_gen(g_T,T)
+        g_T= NetEvoRulAna.net_evo_rul_ana_test(g_T,evol) # 修改net_evo_rul_ana_test为正式版函数名
+        single_app_avail[i+1] = g_T.graph['Application_info']['ApplicationDownTime'].apply(lambda x:1-(x/(T*365*24)))
     single_app_avail['result'] = single_app_avail.apply(np.mean,axis = 1)
     print('单业务可用度计算结果为：'+os.linesep)
     print(single_app_avail)
@@ -57,7 +58,7 @@ def app_ava_cal(file,T,N):
 
 def test():
     T = 10
-    N = 2
+    N = 5
     file = os.getcwd()+os.sep+'test'+os.sep+'file.xlsx'
     return app_ava_cal(file,T,N)
 

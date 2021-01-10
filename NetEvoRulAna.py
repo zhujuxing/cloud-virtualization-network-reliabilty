@@ -178,6 +178,7 @@ if __name__ == '__main__':
     g = nx.read_gpickle('test/newData/g.gpickle')
     # fname = 'test/newData/evol3.xlsx'
     for i in range(10):
-        fname = NetEvoConGen.net_evo_con_gen(g,10)
+        g_T = g.copy()
+        fname = NetEvoConGen.net_evo_con_gen(g_T,10)
         g_T = net_evo_rul_ana_test(g, fname)
     
