@@ -275,6 +275,7 @@ def formating_data(evol):
     
     fail_nodes_set = []
     def to_fail_nodes_set(x):
+        #调试是否有BUG
         nonlocal fail_nodes_set
         if len(x['EvolRecoNodesSet'])==0:
             fail_nodes_set.append(x['EvolFailNodesSet'][0])

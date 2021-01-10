@@ -59,8 +59,10 @@ def net_evo_rul_ana_test(g, fname):
                                     continue
                             G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 1
                             Uptime[appID] = float(x['EvolTime'][0])
-                            G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
-
+                            try: # TODO:调试BUG 
+                                G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
+                            except:
+                                pass
                 if RecoNode[0] == 'S':  # 修复节点为Server
                     pass
 
@@ -82,7 +84,7 @@ def net_evo_rul_ana_test(g, fname):
                                     continue
                             G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 1
                             Uptime[appID] = float(x['EvolTime'][0])
-                            try:
+                            try: # TODO:调试BUG 
                                 G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
                             except :
                                 break
@@ -176,8 +178,9 @@ def net_evo_rul_ana_test(g, fname):
 
 if __name__ == '__main__':
     g = nx.read_gpickle('test/newData/g.gpickle')
-    # fname = 'test/newData/evol3.xlsx'
-    for i in range(10):
+    fname = 'test/newData/evol3.xlsx'
+    # g_t = net_evo_rul_ana_test(g, fname)
+    for i in range(100):
         g_T = g.copy()
         fname = NetEvoConGen.net_evo_con_gen(g_T,10)
         g_T = net_evo_rul_ana_test(g, fname)
