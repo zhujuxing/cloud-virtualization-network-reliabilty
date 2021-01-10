@@ -152,7 +152,7 @@ def show_nodes_data(g):
         ns = pd.Series(ndata[i])
         ns.name = i
         df = df.append(ns)
-    print(df)
+    # print(df)
     return df 
 
 def show_edges_data(g):
@@ -165,7 +165,7 @@ def show_edges_data(g):
                         'EdgeTraffic':i[2]['EdgeTraffic']})
         df = df.append(ns,ignore_index=True)
     df.index = ['Eg%d'%(i+1) for i in range(len(edata))]
-    print(df)
+    # print(df)
     return df
 
 def test():

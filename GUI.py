@@ -6,6 +6,7 @@ Created on Thu Dec 31 05:33:55 2020
 """
 
 import tkinter as tk
+import AppAvaCal
 
 
 
@@ -36,15 +37,25 @@ def makeform(root, pars):
        entries.append((field, ent))
     return entries
 
-def cal_single_app_avail(e):
-    pass
-
+def cal_single_app_avail(e,t1,t2):
+    file_path = e[0][1].get()
+    T = int(e[1][1].get())
+    N = int(e[2][1].get())
+    sig_app_avail, mul_app_avail = AppAvaCal.app_ava_cal(file_path,T,N)
+    t1.insert('insert',sig_app_avail)
+    t2.insert('insert',str(mul_app_avail))
+    
 def cal_multi_app_avail(e):
     pass
 
 def output_avail_file(e):
     pass
 
+'''
+测试用
+文件路径：
+D:\博士生资料\项目\2020.7 NFV项目\项目文档\程序\cloud-virtualization-network-reliabilty\test\file.xlsx
+'''
 
 if __name__ == '__main__':
     root = tk.Tk()
@@ -69,17 +80,7 @@ if __name__ == '__main__':
     frame_func = tk.LabelFrame(frame_left,text='功能面板')
     frame_func.pack(side=tk.TOP,fill=tk.X)
     
-    button_cal_single = tk.Button(frame_func,text='单业务可靠度计算')
-    button_cal_single.pack(side=tk.LEFT,fill=tk.X)
-    button_cal_single.bind("<Button-1>",(lambda event, e=ents_input:cal_single_app_avail(e)))
     
-    button_cal_multi = tk.Button(frame_func,text='整网业务可靠度计算')
-    button_cal_multi.pack(side=tk.LEFT,fill=tk.X)
-    button_cal_multi.bind("<Button-1>",(lambda event, e=ents_input:cal_multi_app_avail(e)))
-    
-    button_output_file = tk.Button(frame_func,text='输出计算结果文件')
-    button_output_file.pack(side=tk.LEFT,fill=tk.X)
-    button_output_file.bind("<Button-1>",(lambda event, e=ents_input:output_avail_file(e)))
     
     frame_out = tk.LabelFrame(frame_right,text='输出面板')
     frame_out.pack(side=tk.TOP,fill=tk.X)
@@ -100,4 +101,17 @@ if __name__ == '__main__':
     text_result_mul = tk.Text(frame_out_mul,width=26,height=1)
     text_result_mul.pack(side=tk.LEFT)
 
+    button_cal_single = tk.Button(frame_func,text='单业务可靠度计算')
+    button_cal_single.pack(side=tk.LEFT,fill=tk.X)
+    button_cal_single.bind("<Button-1>",(lambda event, e=ents_input,t1=text_result_sig,
+                                        t2=text_result_mul:cal_single_app_avail(e,t1,t2)))
+    
+    button_cal_multi = tk.Button(frame_func,text='整网业务可靠度计算')
+    button_cal_multi.pack(side=tk.LEFT,fill=tk.X)
+    button_cal_multi.bind("<Button-1>",(lambda event, e=ents_input:cal_multi_app_avail(e)))
+    
+    button_output_file = tk.Button(frame_func,text='输出计算结果文件')
+    button_output_file.pack(side=tk.LEFT,fill=tk.X)
+    button_output_file.bind("<Button-1>",(lambda event, e=ents_input:output_avail_file(e)))
+   
     root.mainloop()

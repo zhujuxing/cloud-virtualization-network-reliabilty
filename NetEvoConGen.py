@@ -266,12 +266,23 @@ def formating_data(evol):
     # global evol
     def time_add(x):
         nonlocal t
-        result = str([t,t+x])
+        result = [t,t+x]
         t += x
         return result
     evol['EvolTime'] = evol['EvolTime'].apply(time_add)
     # evol['EvolFailNodesSet'] = evol['EvolFailNodesSet'].apply(lambda x:str(x))
     # evol['EvolRecoNodesSet'] = evol['EvolRecoNodesSet'].apply(lambda x:str(x))
+    
+    fail_nodes_set = []
+    def to_fail_nodes_set(x):
+        nonlocal fail_nodes_set
+        if len(x['EvolRecoNodesSet'])==0:
+            fail_nodes_set.append(x['EvolFailNodesSet'][0])
+        else:
+            fail_nodes_set.remove(x['EvolRecoNodesSet'][0])
+        return fail_nodes_set.copy()
+    # evol1 = evol.copy()
+    evol['EvolFailNodesSet'] = evol.apply(to_fail_nodes_set,axis = 1)
     return evol
 
 def net_evo_con_gen(Gpath, T):
@@ -306,9 +317,10 @@ def test():
     Gpath = os.getcwd()+os.sep+'test'+os.sep+'g.gpickle'
     # Gpath = g
     evol = net_evo_con_gen(Gpath, T)
-    evol.to_excel('evol.xlsx')
+    # evol.to_excel('evol.xlsx')
     t_end = time.time()
     print(t_end-t_start)
+    return evol
     
 if __name__ == '__main__':
-    test()
+    evol = test()

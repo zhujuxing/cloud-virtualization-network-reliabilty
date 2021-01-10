@@ -17,7 +17,7 @@ import os
 
 def app_ava_cal(file,T,N):
     """
-    
+    该函数为业务可用度计算主函数。
 
     Parameters
     ----------
@@ -46,7 +46,11 @@ def app_ava_cal(file,T,N):
         g_T= NetEvoRulAna.net_evo_rul_ana_test(g,evol) # 修改net_evo_rul_ana_test为正式版函数名
         single_app_avail[i+1] = g_T.graph['Application_info']['ApplicationDownTime'].apply(lambda x:1-x/T)
     single_app_avail['result'] = single_app_avail.apply(np.mean,axis = 1)
+    print('单业务可用度计算结果为：'+os.linesep)
+    print(single_app_avail)
+    
     whole_app_avail = np.mean(single_app_avail['result'].to_list())
+    print('整网业务可用度计算结果为：%f'%whole_app_avail)
     # return single_app_avail, whole_app_avail
     return single_app_avail,whole_app_avail
     
