@@ -9,7 +9,10 @@ import networkx as nx
 import pandas as pd
 import os
 
+
+# 增加节点类型'Vs'
 def net_evo_obj_mod(file)->nx.Graph:
+    
     """
     该函数为演化对象生成函数。
 
@@ -32,9 +35,9 @@ def net_evo_obj_mod(file)->nx.Graph:
     edge_info = pd.read_excel(file,sheet_name='edge_info')
     fail_info = pd.read_excel(file,sheet_name='fail_info')
     VNF_info = pd.read_excel(file,sheet_name='VNF_info')
-    Service_info = pd.read_excel(file,sheet_name='Service_info')
+    # Service_info = pd.read_excel(file,sheet_name='Service_info')
     Application_info = pd.read_excel(file,sheet_name='Application_info')
-    VNF_evorule = pd.read_excel(file,sheet_name='VNF_evorule')
+    # VNF_evorule = pd.read_excel(file,sheet_name='VNF_evorule')
         
     g = nx.Graph()
   
@@ -54,16 +57,24 @@ def net_evo_obj_mod(file)->nx.Graph:
                                         '节点维修时间分布':'NodeRecoDistri',
                                         '节点备份策略':'NodeRecoStra'}) 
     for i in node_attr:
+        # x = node_attr[i]['NodeType']
+        # attr_temp = fail_info.query('NodeType==@x')
+        # node_attr[i].update(attr_temp.to_dict())
+        
         if node_attr[i]['NodeType'] == 'DCGW':
             node_attr[i].update(fail_info.iloc[0].to_dict())
-        elif node_attr[i]['NodeType'] == 'TOR': 
+        elif node_attr[i]['NodeType'] == 'EOR': 
             node_attr[i].update(fail_info.iloc[1].to_dict())
-        elif node_attr[i]['NodeType'] == 'Server':
+        elif node_attr[i]['NodeType'] == 'TOR': 
             node_attr[i].update(fail_info.iloc[2].to_dict())
-        elif node_attr[i]['NodeType'] == 'VM':
+        elif node_attr[i]['NodeType'] == 'Server':
             node_attr[i].update(fail_info.iloc[3].to_dict())
-        elif node_attr[i]['NodeType'] == 'Proc':
+        elif node_attr[i]['NodeType'] == 'Vswitch':
             node_attr[i].update(fail_info.iloc[4].to_dict())
+        elif node_attr[i]['NodeType'] == 'VM':
+            node_attr[i].update(fail_info.iloc[5].to_dict())
+        elif node_attr[i]['NodeType'] == 'Proc':
+            node_attr[i].update(fail_info.iloc[6].to_dict())
     nx.set_node_attributes(g,node_attr)
     nx.set_node_attributes(g,float('nan'),'NodeFailMR')
     nx.set_node_attributes(g,float('nan'),'NodeFailMT')
@@ -80,9 +91,9 @@ def net_evo_obj_mod(file)->nx.Graph:
     nx.set_edge_attributes(g,10,'EdgeCapacity')
     nx.set_edge_attributes(g,8,'EdgeTraffic')
         
-    
+
     for i in g.nodes:
-        if g.nodes[i]['NodeType'] == 'Server':
+        if g.nodes[i]['NodeType'] == 'Server':  
             g.nodes[i]['NodeFailMR'] = 0.9
             g.nodes[i]['NodeFailMT'] = 0.166667
             # g.nodes[i]['NodeMP'] = [nx.shortest_path(g,i,'S4'),
@@ -103,13 +114,9 @@ def net_evo_obj_mod(file)->nx.Graph:
     Application_info = Application_info.set_index('ApplicationID')
     # 计算业务物理路径
     Application_info['ApplicationDownTime'] = 0
-    Application_info['ApplicationWorkPath'] = 'D1,T1,S1,V1,V2,V1,S1,T1,D1'
+    Application_info['ApplicationWorkPath'] = str(['D1','T1','S1','Vs1','V2','Vs1',
+                                               'S1','T1','D1'])
     
-    Service_info = Service_info.rename(columns={'Service名称':'ServiceID',
-                                                'Service路径':'ServiceVNF'})
-    Service_info = Service_info.set_index('ServiceID')
-    
-    VNF_info = pd.merge(VNF_info,VNF_evorule,how='left',on=['VNF名称','备份类型'])
     VNF_info['倒换控制链路'] = str([])
     VNF_info = VNF_info.rename(columns={'VNF名称':'VNFID',
                                         '数据类型':'VNFDataType',
@@ -132,11 +139,10 @@ def net_evo_obj_mod(file)->nx.Graph:
 
     
     g.graph['VNF_info'] = VNF_info
-    g.graph['Service_info'] = Service_info
     g.graph['Application_info'] = Application_info
     g.graph['Node_info'] = show_nodes_data(g)
     g.graph['Edge_info'] = show_edges_data(g)
-    # nx.write_gpickle(g,'g.gpickle')
+
     return g
 
 def show_nodes_data(g):
@@ -179,5 +185,4 @@ if __name__ == '__main__':
     ni = g.graph['Node_info']
     ei = g.graph['Edge_info']
     vi = g.graph['VNF_info']
-    si = g.graph['Service_info']
     ai = g.graph['Application_info']
