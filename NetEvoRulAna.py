@@ -49,7 +49,7 @@ def net_evo_rul_ana_test(g, fname):
                         continue
                     if status == 0:
                         nodes = G_T.graph['Application_info']['ApplicationWorkPath'][appID]
-                        nodes = nodes.replace("[", '').replace("]", '')
+                        #nodes = nodes.replace("[", '').replace("]", '')
                         nodes = nodes.split(',')
                         for node in nodes:
                             if (node in x['EvolFailNodesSet']):
@@ -78,7 +78,7 @@ def net_evo_rul_ana_test(g, fname):
                             continue
                         if status == 1:
                             nodes = G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath']
-                            nodes = nodes.replace("[", '').replace("]", '')
+                            #nodes = nodes.replace("[", '').replace("]", '')
                             nodes = nodes.split(',')
                             for node in nodes:
                                 if (node in x['EvolFailNodesSet']):
@@ -95,7 +95,7 @@ def net_evo_rul_ana_test(g, fname):
                     for VNFID, VNFDeployNode in G_T.graph['VNF_info']['VNFDeployNode'].items():
                         nodes = VNFDeployNode
                         nodes = str(nodes).replace("[",'').replace("]",'')
-                        nodes = nodes.split(',')
+                    #nodes = nodes.split(',')
                         if (FailNode_name in nodes):
                             FailNode = ''.join(FailNode)
                             if G_T.graph['VNF_info']['VNFBackupType'][VNFID] == '主机':
@@ -143,11 +143,13 @@ def net_evo_rul_ana_test(g, fname):
                             else:#Nway型VNF
                                 pass
     evol.apply(rul_ana,axis=1)
-    print("\nApp Down Start time: ", Downtime)
-    print("App Up Start time: ", Uptime)
-    print("App Total Downtime: ", round(G_T.graph['Application_info'].loc['App1', 'ApplicationDownTime'], 5))
-    print(G_T.graph['Application_info'].loc['App1', 'ApplicationWorkPath'])
-    print(G_T.nodes['V1'])
+    # print("\nApp Down Start time: ", Downtime)
+    # print("App Up Start time: ", Uptime)
+    # print("App Total Downtime: ", round(G_T.graph['Application_info'].loc['App1', 'ApplicationDownTime'], 5))
+    # print(G_T.graph['Application_info'].loc['App1', 'ApplicationWorkPath'])
+    # print(G_T.nodes['V1'])
+    print(G_T.graph['Application_info']['ApplicationService'])
+    print(G_T.graph['VNF_info']['VNFDeployNode'])
     return G_T
 
     # -*- coding: utf-8 -*-
