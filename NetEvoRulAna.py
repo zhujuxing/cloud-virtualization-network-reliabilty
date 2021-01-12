@@ -95,7 +95,7 @@ def net_evo_rul_ana_test(g, fname):
                     for VNFID, VNFDeployNode in G_T.graph['VNF_info']['VNFDeployNode'].items():
                         nodes = VNFDeployNode
                         nodes = str(nodes).replace("[",'').replace("]",'')
-                    #nodes = nodes.split(',')
+                        nodes = nodes.split(',')
                         if (FailNode_name in nodes):
                             FailNode = ''.join(FailNode)
                             if G_T.graph['VNF_info']['VNFBackupType'][VNFID] == '主机':
@@ -103,8 +103,9 @@ def net_evo_rul_ana_test(g, fname):
                                     if status == 0:
                                         continue
                                     if status == 1:
-                                        VNFNode = G_T.graph['VNF_info'].loc[G_T.graph['Application_info'].loc[appID, 'ApplicationService'], 'VNFDeployNode']
-                                        if (FailNode in VNFNode):
+                                        #VNFNode = G_T.graph['VNF_info'].loc[G_T.graph['Application_info'].loc[appID, 'ApplicationService'], 'VNFDeployNode']
+                                        ApplicationNode = G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath']
+                                        if (FailNode in ApplicationNode):
                                             G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 0
                                             Downtime[appID] = float(x['EvolTime'][0])
                                         else:
