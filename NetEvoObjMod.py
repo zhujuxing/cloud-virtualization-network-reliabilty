@@ -110,7 +110,7 @@ def net_evo_obj_mod(file)->nx.Graph:
     Application_info['ApplicationTraffic'] = 1
     Application_info['ApplicationThreshold'] = 0
     Application_info['ApplicationDownStartTime'] = 0
-    Application_info['ApplicationService'] = 'VNF2'
+    Application_info['ApplicationVNFs'] = 'VNF2'
     Application_info = Application_info.set_index('ApplicationID')
     # 计算业务物理路径
     Application_info['ApplicationDownTime'] = 0
