@@ -66,7 +66,7 @@ def net_evo_rul_ana_test(g, fname):
         # 故障节点集怎么操作，对这个集合下的所有节点操作x['EvolFailNodesSet']
             # DCGW/EOR/TOR
             # Server
-            #VSwitch
+            # VS "Vs"
             # VM
         for FailNode in x['EvolFailNodesSet']:#遍历演化态下的故障节点集
              FailNode_name = FailNode
@@ -153,6 +153,7 @@ def net_evo_rul_ana_test(g, fname):
     return G_T
 
     # -*- coding: utf-8 -*-
+
 
 
 if __name__ == '__main__':

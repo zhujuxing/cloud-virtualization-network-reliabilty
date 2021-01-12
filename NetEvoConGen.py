@@ -14,7 +14,7 @@ import re
 import os
 import time
 
-
+# 增加一个节点类型"Vs1" "Vswitch"
 def init(Gpath, Tset):
     '''
     读取gpickle.Gpath表示gpickle路径，Tset表示演化时长
@@ -28,9 +28,11 @@ def init(Gpath, Tset):
 
     elif type(Gpath) == nx.Graph:
         G = Gpath
-    # global df, node_info, u_asp, u_chk
+
     df = pd.DataFrame([turple[1] for turple in G.nodes(data=True)])
     df.insert(0, 'NodeID', [turple[0] for turple in G.nodes(data=True)])
+    
+    # df = G.graph['Node_info'] # 修改：G对象已经有该信息了。
     
     node_info = df.copy(deep=True)
     node_info.insert(3, 'FailureTime', 0)
@@ -80,7 +82,7 @@ def fail_state(x,T,df,u_asp,u_chk):
     fail_time = []
     reco_time = []
 
-    fail_dt = df[df['NodeID'] == x['NodeID']]
+    fail_dt = df[df['NodeID'] == x['NodeID']] 
     fail_time = [[] for i in range(len(fail_dt))]
     reco_time = [[] for i in range(len(fail_dt))]
     i = 0
@@ -116,7 +118,7 @@ def fail_state(x,T,df,u_asp,u_chk):
                                break
                             else:
                                break
-                else:
+                else: # 故障未检测
                     if row[1]['NodeType'] in ('Server', 'DCGW', 'TOR'):
                        t_r = u_chk
                     else:
@@ -282,7 +284,7 @@ def formating_data(evol):
         else:
             fail_nodes_set.remove(x['EvolRecoNodesSet'][0])
         return fail_nodes_set.copy()
-    # evol1 = evol.copy()
+    evol1 = evol.copy()
     evol['EvolFailNodesSet'] = evol.apply(to_fail_nodes_set,axis = 1)
     return evol
 
@@ -323,5 +325,8 @@ def test():
     print(t_end-t_start)
     return evol
     
+
+def test_gin():
+    pass
 if __name__ == '__main__':
     evol = test()
