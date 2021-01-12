@@ -15,12 +15,12 @@ import os
 import time
 
 # 增加一个节点类型"Vs1" "Vswitch"
-def init(Gpath, Tset):
+def init(Gpath, T):
     '''
     读取gpickle.Gpath表示gpickle路径，Tset表示演化时长
     '''
     # global T
-    T = Tset*365*24
+    Tset = T*365*24
     # gpickle转换成DataFrame
     if type(Gpath) == str:
         with open(Gpath, 'rb') as fo:
@@ -29,19 +29,14 @@ def init(Gpath, Tset):
     elif type(Gpath) == nx.Graph:
         G = Gpath
 
-    df = pd.DataFrame([turple[1] for turple in G.nodes(data=True)])
-    df.insert(0, 'NodeID', [turple[0] for turple in G.nodes(data=True)])
+    node_info = pd.DataFrame([turple[1] for turple in G.nodes(data=True)])
+    node_info.insert(0, 'NodeID', [turple[0] for turple in G.nodes(data=True)])
     
     # df = G.graph['Node_info'] # 修改：G对象已经有该信息了。
     
-    node_info = df.copy(deep=True)
     node_info.insert(3, 'FailureTime', 0)
     node_info.insert(4, 'RepairTime', 0)
-    
-    u_asp = node_info.loc[1, 'Tasp']
-    u_chk = node_info.loc[1, 'Tchk']
-    
-    return T,df,node_info,u_asp,u_chk
+    return Tset, node_info
     
     
     
@@ -65,7 +60,7 @@ def convert(x):
         return x
 
 
-def fail_state(x,T,df,u_asp,u_chk):
+def fail_state(x, T, node_info):
     '''
     单个构件、单个模式生成状态
     Parameters
@@ -82,7 +77,7 @@ def fail_state(x,T,df,u_asp,u_chk):
     fail_time = []
     reco_time = []
 
-    fail_dt = df[df['NodeID'] == x['NodeID']] 
+    fail_dt = node_info[node_info['NodeID'] == x['NodeID']] 
     fail_time = [[] for i in range(len(fail_dt))]
     reco_time = [[] for i in range(len(fail_dt))]
     i = 0
@@ -93,67 +88,69 @@ def fail_state(x,T,df,u_asp,u_chk):
         AFRR = convert(row[1]['NodeFailAFDR'])
         AFRT = convert(row[1]['NodeFailAFDT'])
         MTTR = convert(row[1]['NodeFailMTTR'])
+        u_asp = convert(row[1]['Tasp'])
+        u_chk = convert(row[1]['Tchk'])
         while True:
-            if t<=T:
+            if t>T:
+                break
+            else:
                 delta = random.random()
                 t_f  = -math.log(delta) * MTBF
                 t_hr = -math.log(delta) * MTTR
                 if random.random() < FDR:
                     t_r = FDT
-                    if row[1]['NodeType'] in ('Server', 'DCGW', 'TOR'):
+                    if row[1]['NodeType'] == ('Server','DCGW','TOR'):
                         t_r += u_asp + t_hr
                     else:
                         if random.random() < AFRR:
                             t_r += AFRT
                         else:
                             t_r += u_asp + t_hr
-                            if (t_r + t) <= T:
-                               fail_time[i].append(t+t_f)
-                               break
+                            if (t_f + t) <= T:
+                                fail_time[i].append(t + t_f)
                             else:
-                               break
+                                break
                             if (t + t_f + t_r) <= T:
-                               reco_time[i].append(t + t_f + t_r)
-                               t = t + t_f + t_r
-                               break
+                                reco_time[i].append(t + t_f + t_r)
+                                #t = t + t_f + t_r
+                                break
                             else:
-                               break
-                else: # 故障未检测
-                    if row[1]['NodeType'] in ('Server', 'DCGW', 'TOR'):
-                       t_r = u_chk
+                                break
+                else:
+                    if row[1]['NodeType'] == ('Server','DCGW','TOR'):
+                        t_r = u_chk
+                        
                     else:
-                       t_r = u_chk
-                       if (t_r + t) <= T:
-                          fail_time[i].append(t+t_f)
-                          break
-                       else:
-                          break
-                       if (t + t_f + t_r) <= T:
-                          reco_time[i].append(t + t_f + t_r)
-                          t = t + t_f + t_r
-                          break
-                       else:
-                          break
-                    
+                        t_r = u_chk
+                        if (t_f + t) <= T:
+                            fail_time[i].append(t+t_f)
+                        else:
+                            break
+                        if (t + t_f + t_r) <= T:
+                            reco_time[i].append(t + t_f + t_r)
+                            #t = t + t_f + t_r
+                            break
+                        else:
+                            break
                 if (t + t_f) <= T:
-                    fail_time[i].append(t+t_f)
+                            fail_time[i].append(t+t_f)
                 else:
-                    break
+                            break
                 if (t + t_f + t_r) <= T:
-                    reco_time[i].append(t + t_f + t_r)
+                            reco_time[i].append(t + t_f + t_r)
                 else:
-                    break
+                            break    
+               
                 t = t + t_f + t_r
-            else: break
         i += 1
     return fail_time, reco_time
 
 
-def singleFR(node_info,T,df,u_asp,u_chk):
+def singleFR(node_info, T):
     '''
     生成单个构件单个故障
     '''
-    temp = node_info.apply(lambda x:fail_state(x,T,df,u_asp,u_chk), axis=1)
+    temp = node_info.apply(lambda x:fail_state(x, T, node_info), axis=1)
     
     node_info['FailureTime'] = temp.apply(lambda x: x[0]) 
     node_info['RepairTime'] = temp.apply(lambda x: x[1]) 
@@ -304,8 +301,8 @@ def net_evo_con_gen(Gpath, T):
         列值：各该时间区间对应的构件名称NodeID列表.
 
     """
-    T,df,node_info,u_asp,u_chk=init(Gpath, T)
-    node_info1 = singleFR(node_info,T,df,u_asp,u_chk)
+    T, node_info = init(Gpath, T)
+    node_info1 = singleFR(node_info,T)
     node_info1 = common_ex(node_info1)
     time_set = time_set_gen(node_info1)
     # evol = Con_gen()
@@ -320,7 +317,7 @@ def test():
     Gpath = os.getcwd()+os.sep+'test'+os.sep+'g.gpickle'
     # Gpath = g
     evol = net_evo_con_gen(Gpath, T)
-    # evol.to_excel('evol.xlsx')
+    evol.to_excel('evol.xlsx')
     t_end = time.time()
     print(t_end-t_start)
     return evol
