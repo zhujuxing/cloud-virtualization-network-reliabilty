@@ -34,8 +34,6 @@ def net_evo_rul_ana_test(g, fname):
             None.
 
         '''
-        # print( x['EvolTime'])
-        # print( x['FailNodeTime'])
         nonlocal G_T       
         # 修复节点怎么操作，对这个集合下的所有节点操作x['EvolRecoNodesSet']
         #for RecoNode in x['EvolRecoNodesSet']:#遍历演化态下的修复节点集  
@@ -43,20 +41,10 @@ def net_evo_rul_ana_test(g, fname):
             if status == 1:
                 continue
             if status == 0:
-                # nodes = G_T.graph['Application_info']['ApplicationWorkPath'][appID]
-                # nodes = nodes.replace("[", '').replace("]", '')
-                # nodes = nodes.split(',')
                 nodes = eval(G_T.graph['Application_info']['ApplicationWorkPath'][appID])
                 if (list(set(nodes).intersection(set(x['EvolFailNodesSet'])))) ==[]:
-                # for node in nodes:
-                #     if (node in x['EvolFailNodesSet']):
-                #         break
-                #     else:
-                #         continue
                     G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 1
                     Uptime[appID] = float(x['EvolTime'][0])
-                    #print(x['EvolTime'])
-                    # G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
                     try: # TODO:调试BUG 
                         G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
                     except:
@@ -77,21 +65,11 @@ def net_evo_rul_ana_test(g, fname):
                             continue
                         if status == 1:
                             nodes = eval(G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath'])
-                            # nodes = G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath']
-                            # nodes = nodes.replace("[", '').replace("]", '')
-                            # nodes = nodes.split(',')
                             if (FailNode in nodes):
                                 G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 0
                                 Downtime[appID] = float(x['EvolTime'][0])
                             else:
                                 continue
-                            # for node in nodes:
-                            #     if (node in x['EvolFailNodesSet']):
-                            #         G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 0
-                            #         Downtime[appID] = float(x['EvolTime'][0])
-                            #         break
-                            #     else:
-                            #         continue
 
                 if Nodetype == 'S':#故障节点为Server
                     pass
@@ -154,14 +132,29 @@ def net_evo_rul_ana_test(g, fname):
                                             else:
                                                 continue
 
-                            else:#Nway型VNF
-                                pass
+                            else:#Nway性业务的故障处理
+                                if(set(G_T.graph['VNF_info']['VNFDeployNode'][VNFID].replace('[', '').replace(']', '')
+                                          .split(',')).issubset(set(x['EvolFailNodesSet']))):
+                                    for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
+                                        if status == 0:
+                                            continue
+                                        if status == 1:
+                                            VNFs = G_T.graph['Application_info'].loc[appID, 'ApplicationVNFs']
+                                            if (VNFID in VNFs):
+                                                G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 0
+                                                Downtime[appID] = float(x['EvolTime'][0])
+                                            else:
+                                                continue
+                                else:
+                                    continue
+                                
+                               
                             
     evol.apply(rul_ana,axis=1)
     print("\nApp Down Start time: ", Downtime)
     print("App Up Start time: ", Uptime)
     print("App Total Downtime: ", round(G_T.graph['Application_info'].loc['App1', 'ApplicationDownTime'], 5))
-    print(G_T.graph['Application_info'].loc['App1', 'ApplicationWorkPath'])
+    # print(G_T.graph['Application_info'].loc['App1', 'ApplicationWorkPath'])
     # print(G_T.nodes['V1'])
     # print(G_T.graph['Application_info']['ApplicationVNFs'])
     # print(G_T.graph['VNF_info']['VNFDeployNode'])
