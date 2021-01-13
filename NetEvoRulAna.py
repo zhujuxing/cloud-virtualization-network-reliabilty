@@ -36,11 +36,11 @@ def net_evo_rul_ana_test(g, fname):
         '''
         nonlocal G_T       
         # 修复节点怎么操作，对这个集合下的所有节点操作x['EvolRecoNodesSet']
-        #for RecoNode in x['EvolRecoNodesSet']:#遍历演化态下的修复节点集  
+        #for RecoNode in x['EvolRecoNodesSet']:#遍历演化态下的修复节点集
         for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
             if status == 1:
                 continue
-            if status == 0:
+            if status == 0:                
                 nodes = eval(G_T.graph['Application_info']['ApplicationWorkPath'][appID])
                 if (list(set(nodes).intersection(set(x['EvolFailNodesSet'])))) ==[]:
                     G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 1
