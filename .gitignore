@@ -12,3 +12,8 @@ __pycache__/NetEvoObjMod.cpython-39.pyc
 test/__pycache__/VNF.cpython-39.pyc
 test/test_Chester.py
 __pycache__/AppAvaCal.cpython-38.pyc
+*.pyc
+*.xml
+*.xml
+*.xml
+*.xml
