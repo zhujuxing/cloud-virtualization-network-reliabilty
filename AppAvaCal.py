@@ -13,7 +13,8 @@ import NetEvoObjMod
 import NetEvoConGen
 import NetEvoRulAna
 import os
-
+import time
+import copy
 
 def app_ava_cal(file,T,N):
     """
@@ -40,9 +41,9 @@ def app_ava_cal(file,T,N):
     
     single_app_avail = pd.DataFrame(columns=[i+1 for i in range(N)])
     whole_app_avail = 0.0
-    g = NetEvoObjMod.net_evo_obj_mod(file)
+    g = NetEvoObjMod.CloudVritualizedNetwork(file)
     for i in range(N):
-        g_T = g.copy()
+        g_T = copy.copy(g)
         evol = NetEvoConGen.net_evo_con_gen(g_T,T)
         g_T= NetEvoRulAna.net_evo_rul_ana_test(g_T,evol) # 修改net_evo_rul_ana_test为正式版函数名
         single_app_avail[i+1] = g_T.graph['Application_info']['ApplicationDownTime'].apply(lambda x:1-(x/(T*365*24)))
@@ -57,10 +58,13 @@ def app_ava_cal(file,T,N):
     
 
 def test():
-    T = 10
-    N = 5
+    T = 100
+    N = 50
     file = os.getcwd()+os.sep+'test'+os.sep+'file.xlsx'
     return app_ava_cal(file,T,N)
 
 if __name__ == '__main__':
+    t1 = time.time()
     single_app_avail,whole_app_avail = test()
+    t2 = time.time()
+    print(t2-t1)
