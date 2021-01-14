@@ -9,11 +9,13 @@ import networkx as nx
 import re
 import pandas as pd
 import NetEvoConGen
+from NetEvoObjMod import CloudVritualizedNetwork
+import copy
 
 def net_evo_rul_ana_test(g, fname):
     Uptime = {}  # 创建一个空字典，记录业务从故障状态转换到正常状态的时刻
     Downtime = {}  # 创建一个空字典，记录业务从正常状态转换到故障状态的时刻
-    G_T = g.copy()
+    G_T = copy.copy(g)
     if type(fname) == str:
         evol = pd.read_excel(fname)
         evol['EvolTime'] = evol['EvolTime'].apply(eval)
