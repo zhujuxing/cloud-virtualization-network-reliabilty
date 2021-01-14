@@ -52,13 +52,7 @@ def cal_multi_app_avail(e):
 def output_avail_file(e):
     pass
 
-'''
-测试用
-文件路径：
-D:\博士生资料\项目\2020.7 NFV项目\项目文档\程序\cloud-virtualization-network-reliabilty\test\file.xlsx
-'''
-
-if __name__ == '__main__':
+def GUI():
     root = tk.Tk()
     root.title('基于网络演化的云化虚拟网络可靠性评估软件')
     # root.geometry("300x50+10+20")
@@ -126,3 +120,11 @@ if __name__ == '__main__':
     button_output_file.bind("<Button-1>",(lambda event, e=ents_input:output_avail_file(e)))
    
     root.mainloop()
+'''
+测试用
+文件路径：
+D:\博士生资料\项目\2020.7 NFV项目\项目文档\程序\cloud-virtualization-network-reliabilty\test\file.xlsx
+'''
+
+if __name__ == '__main__':
+   GUI()

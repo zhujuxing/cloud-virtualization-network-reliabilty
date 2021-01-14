@@ -174,9 +174,9 @@ class CloudVritualizedNetwork(nx.Graph):
     
 
 def test():
-    file = os.getcwd()+os.sep+'test'+os.sep+'file.xlsx'
+    file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx'
     g = CloudVritualizedNetwork(file)
-    nx.write_gpickle(g,'g.gpickle')
+    # nx.write_gpickle(g,'g.gpickle')
     return g
 
 if __name__ == '__main__':

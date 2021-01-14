@@ -5,8 +5,7 @@ Created on Thu Dec 31 05:37:33 2020
 @author: zhujuxing
 """
 
-
-import networkx as nx
+# import networkx as nx
 import pandas as pd
 import numpy as np
 import NetEvoObjMod
@@ -60,7 +59,7 @@ def app_ava_cal(file,T,N):
 def test():
     T = 100
     N = 50
-    file = os.getcwd()+os.sep+'test'+os.sep+'file.xlsx'
+    file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx'
     return app_ava_cal(file,T,N)
 
 if __name__ == '__main__':

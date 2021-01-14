@@ -6,7 +6,6 @@ Created on Thu Dec 31 05:36:15 2020
 """
 
 import networkx as nx
-import pickle
 import pandas as pd
 import random
 import math
@@ -316,7 +315,7 @@ def test():
     # 仿真时间100年，单位小时
     t_start = time.time()
     T = 100
-    Gpath = os.getcwd()+os.sep+'test'+os.sep+'g.gpickle'
+    Gpath = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'g.gpickle'
     # Gpath = g
     evol = net_evo_con_gen(Gpath, T)
     evol.to_excel('evol.xlsx')
