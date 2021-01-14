@@ -11,6 +11,7 @@ import pandas as pd
 import NetEvoConGen
 from NetEvoObjMod import CloudVritualizedNetwork
 import copy
+import os 
 
 def net_evo_rul_ana_test(g, fname):
     Uptime = {}  # 创建一个空字典，记录业务从故障状态转换到正常状态的时刻
@@ -196,7 +197,7 @@ def net_evo_rul_ana_test(g, fname):
     evol.apply(rul_ana,axis=1)
     print("\nApp Down Start time: ", Downtime)
     print("App Up Start time: ", Uptime)
-    print("App Total Downtime: ", round(G_T.graph['Application_info'].loc['App1', 'ApplicationDownTime'], 5))
+    print("App Total Downtime: ", round(G_T.graph['Application_info'].loc['App2', 'ApplicationDownTime'], 5))
     # print(G_T.graph['Application_info'].loc['App1', 'ApplicationWorkPath'])
     # print(G_T.nodes['V1'])
     # print(G_T.graph['Application_info']['ApplicationVNFs'])
@@ -208,8 +209,8 @@ def net_evo_rul_ana_test(g, fname):
 
 
 if __name__ == '__main__':
-    g = nx.read_gpickle('test/g.gpickle')
-    fname = 'test/newData/evol3.xlsx'
+    g = CloudVritualizedNetwork(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx')
+    fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+ 'newData/evol3.xlsx'
     g_t = net_evo_rul_ana_test(g, fname)
     #for i in range(100):
 #        g_T = g.copy()
