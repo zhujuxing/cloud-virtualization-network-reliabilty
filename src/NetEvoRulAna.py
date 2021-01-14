@@ -45,8 +45,8 @@ def net_evo_rul_ana_test(g, fname):
         for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
             if status == 1:
                 continue
-            if status == 0:
-                nodes = eval(G_T.graph['Application_info']['ApplicationWorkPath'][appID])
+            if status == 0:                
+                nodes = eval(G_T.graph['Application_info'].loc[appID,'ApplicationWorkPath'])
                 if (list(set(nodes).intersection(set(x['EvolFailNodesSet'])))) ==[]:
                     G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 1
                     Uptime[appID] = float(x['EvolTime'][0])
@@ -54,7 +54,27 @@ def net_evo_rul_ana_test(g, fname):
                         G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
                     except:
                         pass
-                
+                else:#如果修复节点中有nway型VNF的节点，则该VNF中有一个节点恢复，该VNF就可用。
+                    App_fail_node = list(set(nodes).intersection(set(x['EvolFailNodesSet'])))
+                    VNFs = G_T.graph['Application_info'].loc[appID,'ApplicationVNFs'].split(',')
+                    app_fail_VNFnodes = []
+                    i = 0
+                    for VNFID in VNFs:
+                        if G_T.graph['VNF_info'].loc[VNFID,'VNFBackupType'] == '2 Way':
+                            VNFnodesSet = G_T.graph['VNF_info'].loc[VNFID,'VNFDeployNodes'].replace("[",'').replace("]",'').split(',')
+                            if (list(set(App_fail_node).intersection(set(VNFnodesSet))) == VNFnodesSet):#
+                                break
+                            else:
+                                #记录下业务VNF中故障的节点
+                                app_fail_VNFnodes = list(set((set(App_fail_node).intersection(set(VNFnodesSet)))).union(set(app_fail_VNFnodes)))
+                                i = i+1
+                        else:
+                            pass
+                    if list(set(app_fail_VNFnodes).difference(set(x['EvolFailNodesSet']))) == [] and i == len(VNFs):
+                        G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 1
+                        Uptime[appID] = float(x['EvolTime'][0])
+                    else:
+                        pass
 
         # 故障节点集怎么操作，对这个集合下的所有节点操作x['EvolFailNodesSet']
             # DCGW/EOR/TOR
