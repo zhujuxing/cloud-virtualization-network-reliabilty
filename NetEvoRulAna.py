@@ -39,15 +39,12 @@ def net_evo_rul_ana_test(g, fname):
         nonlocal G_T       
         # 修复节点怎么操作，对这个集合下的所有节点操作x['EvolRecoNodesSet']
         #for RecoNode in x['EvolRecoNodesSet']:#遍历演化态下的修复节点集
-<<<<<<< HEAD
-=======
 
->>>>>>> c70adec7e0316a44ef50a4024970a23b88c364df
         for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
             if status == 1:
                 continue
             if status == 0:                
-                nodes = eval(G_T.graph['Application_info']['ApplicationWorkPath'][appID])
+                nodes = eval(G_T.graph['Application_info'].loc[appID,'ApplicationWorkPath'])
                 if (list(set(nodes).intersection(set(x['EvolFailNodesSet'])))) ==[]:
                     G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 1
                     Uptime[appID] = float(x['EvolTime'][0])
@@ -55,7 +52,17 @@ def net_evo_rul_ana_test(g, fname):
                         G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
                     except:
                         pass
-                
+                # else:#如果修复节点中有nway型VNF的节点，则该VNF中有一个节点恢复，该VNF就可用。
+                #     App_fail_node = list(set(nodes).intersection(set(x['EvolFailNodesSet'])))
+                #     VNFs = G_T.graph['Application_info'].loc[appID,'ApplicationVNFs'].split(',')
+                #     i = 0
+                #     for VNFID in VNFs:
+                #         VNFnodesSet = G_T.graph['VNF_info'].loc[VNFID,'VNFDeployNodes'].replace("[",'').replace("]",'').split(',')
+                #         if (list(set(App_fail_node).intersection(set(VNFnodesSet))) == VNFnodesSet):
+                #             break
+                #         else:
+                #            i += 1
+                    
 
         # 故障节点集怎么操作，对这个集合下的所有节点操作x['EvolFailNodesSet']
             # DCGW/EOR/TOR
