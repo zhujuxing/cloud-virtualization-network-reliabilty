@@ -116,7 +116,7 @@ class CloudVritualizedNetwork(nx.Graph):
         Application_info['ApplicationWorkPath'] = str(['D1','T1','S1','Vs1','V2','Vs1',
                                                    'S1','T1','D1'])
         
-        VNF_info['倒换控制链路'] = str([])
+        VNF_info['倒换控制链路'] = str([])   
         VNF_info = VNF_info.rename(columns={'VNF名称':'VNFID',
                                             '数据类型':'VNFDataType',
                                             '备份类型':'VNFBackupType',
@@ -170,6 +170,9 @@ class CloudVritualizedNetwork(nx.Graph):
         df.index = ['Eg%d'%(i+1) for i in range(len(edata))]
         # print(df)
         return df        
+    
+    def update_app_work_path(self):
+        pass
     
     
 
