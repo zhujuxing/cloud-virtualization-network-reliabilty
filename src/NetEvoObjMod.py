@@ -13,7 +13,7 @@ import pandas as pd
 from tabulate import tabulate
 import numpy as np
 
-desired_width= 350
+desired_width= 600
 
 pd.set_option('display.width', desired_width)
 
@@ -183,8 +183,8 @@ class CloudVritualizedNetwork(nx.Graph):
         return df
     def displayApp(self, g):
         #print(tabulate(g.graph['Application_info']))
-        print('业务名称  业务逻辑路径     可用度  状态 初始流量 流量  阈值    中断时间      工作路径')
-        print(tabulate(g.graph['Application_info'], headers='firstrow'))
+        #print('业务名称  业务逻辑路径     可用度  状态 初始流量 流量  阈值    中断时间      工作路径')
+        print(tabulate(g.graph['Application_info'], headers=['业务名称',  '    业务逻辑路径','可用度','  状态', '   初始流量', '     流量',  '     阈值','      中断时间','           工作路径']))
 
     def update_app_work_path(self):
         VNF_info = self.graph['VNF_info']

@@ -316,11 +316,6 @@ if __name__ == '__main__':
     fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+ 'newData/evol3.xlsx'
     g_t = net_evo_rul_ana_test(g, fname)
     g.displayApp(g)
-
-    print("\nApp Down Start time: ", Downtime)
-    print("App Up Start time: ", Uptime)
-    print("App Total Downtime: ", round(g.graph['Application_info'].loc['App1', 'ApplicationDownTime'], 5))
-    print("App Total Downtime: ", round(g.graph['Application_info'].loc['App2', 'ApplicationDownTime'], 5))
     #for i in range(100):
 #        g_T = g.copy()
 #        fname = NetEvoConGen.net_evo_con_gen(g_T,10)
