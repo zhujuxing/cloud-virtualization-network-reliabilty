@@ -55,25 +55,28 @@ def net_evo_rul_ana_test(g, fname):
                 if (list(set(nodes).intersection(set(x['EvolFailNodesSet'])))) ==[]:
                     G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 1
                     Uptime[appID] = float(x['EvolTime'][0])
-                    try: # TODO:调试BUG 
-                        G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
-                    except:
-                        pass
+                    G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
+
                 else:#如果修复节点中有nway型VNF的节点，则该VNF中有一个节点恢复，该VNF就可用。
                     App_fail_node = list(set(nodes).intersection(set(x['EvolFailNodesSet'])))
-                    VNFs = G_T.graph['Application_info'].loc[appID,'ApplicationVNFs'].split(',')
+                    # VNFs = G_T.graph['Application_info'].loc[appID,'ApplicationVNFs'].split(',')
+                    VNFs = G_T.graph['Application_info'].loc[appID,'ApplicationVNFs'].strip('[]').split(',')
+                    VNFs = VNFs[1:-1]
                     app_fail_VNFnodes = []
                     i = 0
                     for VNFID in VNFs:
-                        if G_T.graph['VNF_info'].loc[VNFID,'VNFBackupType'] == '2 Way':
-                            VNFnodesSet = G_T.graph['VNF_info'].loc[VNFID,'VNFDeployNodes'].replace("[",'').replace("]",'').split(',')
-                            if (list(set(App_fail_node).intersection(set(VNFnodesSet))) == VNFnodesSet):#
-                                break
+                        try:
+                            if G_T.graph['VNF_info'].loc[VNFID,'VNFBackupType'] == '2 Way':
+                                VNFnodesSet = G_T.graph['VNF_info'].loc[VNFID,'VNFDeployNodes'].replace("[",'').replace("]",'').split(',')
+                                if (list(set(App_fail_node).intersection(set(VNFnodesSet))) == VNFnodesSet):#
+                                    break
+                                else:
+                                    #记录下业务VNF中故障的节点
+                                    app_fail_VNFnodes = list(set((set(App_fail_node).intersection(set(VNFnodesSet)))).union(set(app_fail_VNFnodes)))
+                                    i = i+1
                             else:
-                                #记录下业务VNF中故障的节点
-                                app_fail_VNFnodes = list(set((set(App_fail_node).intersection(set(VNFnodesSet)))).union(set(app_fail_VNFnodes)))
-                                i = i+1
-                        else:
+                                pass
+                        except:
                             pass
                     if list(set(app_fail_VNFnodes).difference(set(x['EvolFailNodesSet']))) == [] and i == len(VNFs):
                         G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 1
@@ -139,6 +142,7 @@ def vSwitchFail(G_T, FailNode, x):
                 Downtime[appID] = float(x['EvolTime'][0])
             else:
                 continue
+            
 def VMFail(G_T, FailNode, x):
     for VNFID, VNFDeployNode in G_T.graph['VNF_info']['VNFDeployNode'].items():
         nodes = VNFDeployNode
@@ -217,6 +221,7 @@ def VMFail(G_T, FailNode, x):
                                 continue
                 else:
                     continue
+
 
 
 if __name__ == '__main__':

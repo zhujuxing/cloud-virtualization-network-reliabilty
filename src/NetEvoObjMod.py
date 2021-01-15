@@ -8,7 +8,8 @@ Created on Thu Dec 31 05:34:57 2020
 import networkx as nx
 import pandas as pd
 import os
-
+# import itertools
+from itertools import product
 
 # 增加节点类型'Vs'
 class CloudVritualizedNetwork(nx.Graph):
@@ -100,7 +101,7 @@ class CloudVritualizedNetwork(nx.Graph):
                 self.nodes[i]['NodeMP'] = []
     
         Application_info = Application_info.rename(columns={'业务名称':'ApplicationID',
-                                                    '业务逻辑路径':'ApplicationService',
+                                                    '业务逻辑路径':'ApplicationVNFs',
                                                     '业务物理路径':'ApplicationWorkPath',
                                                     '业务中断时间':'ApplicationUnavailTime'})
         Application_info['ApplicationAvail'] = 1.0
@@ -109,13 +110,13 @@ class CloudVritualizedNetwork(nx.Graph):
         Application_info['ApplicationTraffic'] = 1
         Application_info['ApplicationThreshold'] = 0
         Application_info['ApplicationDownStartTime'] = 0
-        Application_info['ApplicationVNFs'] = 'VNF2'
+        # Application_info['ApplicationVNFs'] = 'VNF2'
         Application_info = Application_info.set_index('ApplicationID')
         # 计算业务物理路径
         Application_info['ApplicationDownTime'] = 0
         Application_info['ApplicationWorkPath'] = str(['D1','T1','S1','Vs1','V2','Vs1',
-                                                   'S1','T1','D1'])
-        
+                                                    'S1','T1','D1'])
+
         VNF_info['倒换控制链路'] = str([])   
         VNF_info = VNF_info.rename(columns={'VNF名称':'VNFID',
                                             '数据类型':'VNFDataType',
@@ -141,6 +142,7 @@ class CloudVritualizedNetwork(nx.Graph):
         self.graph['Application_info'] = Application_info
         self.graph['Node_info'] = self.update_nodes_data()
         self.graph['Edge_info'] = self.update_edges_data()
+        self.update_app_work_path()
         
     def update_nodes_data(self):
         df = pd.DataFrame(columns=['NodeType','NodeFailType',
@@ -172,8 +174,32 @@ class CloudVritualizedNetwork(nx.Graph):
         return df        
     
     def update_app_work_path(self):
-        pass
-    
+        VNF_info = self.graph['VNF_info']
+        def find_work_path(x,VNF_info):
+            logic_path = x['ApplicationVNFs']
+            logic_path = logic_path.strip('[]').split(',')
+            # entrance_device = logic_path[0]
+            # exit_device = logic_path[-1]
+            # logic_path = logic_path[1:-1]
+            work_path = []
+            for i in range(len(logic_path)-1):
+                source = logic_path[i]
+                target = logic_path[i+1]
+                if 'VNF' in source:
+                    source = VNF_info.loc[source,'VNFDeployNode']
+                    source = source.strip('[]').split(',')
+                else:
+                    source = [source]
+                if 'VNF' in target:
+                    target = VNF_info.loc[target,'VNFDeployNode']
+                    target = target.strip('[]').split(',')
+                else:
+                    target = [target]
+                for j,k in product(source,target):
+                    work_path.extend(nx.shortest_path(self,j,k))
+            return str(work_path)
+        value = self.graph['Application_info'].apply(lambda x:find_work_path(x,VNF_info),axis = 1)
+        self.graph['Application_info']['ApplicationWorkPath'] = value
     
 
 def test():
