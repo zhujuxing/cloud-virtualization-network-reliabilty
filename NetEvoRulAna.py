@@ -89,7 +89,7 @@ def net_evo_rul_ana_test(g, fname):
                     Vs_node = G_T.graph['Edge_info'].loc[
                         Server_index[0], 'EdgeDestinationNode']  # Server节点的Vs节点            如 'Vs1'
                     Vs_index = Edge_df[(
-                                Edge_df.EdgeSourceNode == Vs_node)].index.tolist()  # Vs节点的索引                      如['Eg13','Eg14','Eg15','Eg16']
+                            Edge_df.EdgeSourceNode == Vs_node)].index.tolist()  # Vs节点的索引                      如['Eg13','Eg14','Eg15','Eg16']
 
                     for i in Vs_index:
                         node_i = G_T.graph['Edge_info'].loc[i, 'EdgeDestinationNode']  # vs的子节点  如 'V1'
@@ -123,7 +123,7 @@ def net_evo_rul_ana_test(g, fname):
                                                                            'Application_info'].ApplicationVNFs == VNF_i)].index.tolist()  # 故障VNF所在的业务    如 ['App1']
                             for app_i in app_index:
                                 G_T.graph['Application_info'].loc[app_i, 'ApplicationDownTime'] += (
-                                            (float(s[0]) / 3600) + (m / 3600))
+                                        (float(s[0]) / 3600) + (m / 3600))
 
                         elif G_T.graph['VNF_info'].loc[VNF_i, 'VNFBackupType'] == '2 Way':
                             app_index = G_T.graph['Application_info'][(G_T.graph[
@@ -146,7 +146,7 @@ def net_evo_rul_ana_test(g, fname):
                     # 迁移策略
 
                     server_list = G_T.graph['Node_info'][(G_T.graph['Node_info'].NodeIdle == 0) & (
-                                G_T.graph['Node_info'].NodeType == 'Server')].index.tolist()  # 空闲节点
+                            G_T.graph['Node_info'].NodeType == 'Server')].index.tolist()  # 空闲节点
                     server = random.choice(server_list)  # 迁移后的server
 
                     # 寻找迁移后的server子vm节点
@@ -157,7 +157,7 @@ def net_evo_rul_ana_test(g, fname):
                     Vs_node = G_T.graph['Edge_info'].loc[
                         Server_index[0], 'EdgeDestinationNode']  # Server节点的Vs节点            如 'Vs1'
                     Vs_index = Edge_df[(
-                                Edge_df.EdgeSourceNode == Vs_node)].index.tolist()  # Vs节点的索引                      如['Eg13','Eg14','Eg15','Eg16']
+                            Edge_df.EdgeSourceNode == Vs_node)].index.tolist()  # Vs节点的索引                      如['Eg13','Eg14','Eg15','Eg16']
 
                     for i in Vs_index:
                         node_i = G_T.graph['Edge_info'].loc[i, 'EdgeDestinationNode']  # vs的子节点  如 'V1'
@@ -175,7 +175,7 @@ def net_evo_rul_ana_test(g, fname):
                             DeployNode = G_T.graph['VNF_info'].loc[VNF_list[i], 'VNFDeployNode']  # 如 ['V1', 'V3']
                             tmp1 = [val for val in fail_server_vm if val in DeployNode]  # 如 ['V1']
                             update_DeployNode = DeployNode.replace(tmp1, server_vm[i])  # 如 ['V4', 'V3']
-                
+
                 if Nodetype == 'Vs':#故障节点为Vswitch
                     Nodetype = ''.join(re.findall(r'[A-Za-z]', FailNode))
                     for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
