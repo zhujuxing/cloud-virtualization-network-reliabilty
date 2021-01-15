@@ -12,6 +12,7 @@ import NetEvoConGen
 from NetEvoObjMod import CloudVritualizedNetwork
 import copy
 import os
+import random
 #TODO: 将功能拆解为多个小块函数
 
 Uptime = {}  # 创建一个空字典，记录业务从故障状态转换到正常状态的时刻
@@ -95,7 +96,103 @@ def net_evo_rul_ana_test(g, fname):
                     hardwareFail(G_T, FailNode, x)
 
                 if Nodetype == 'S':#故障节点为Server
-                    pass
+                    continue#server故障还在调试中
+
+                    # 获取故障server的vm节点列表fail_server_vm
+                    fail_server_vm = []  # Vs子vm节点列表  如['V1', 'V2']
+                    Edge_df = G_T.graph['Edge_info']
+                    Server_index = Edge_df[
+                        (Edge_df.EdgeSourceNode == FailNode)].index.tolist()  # Server节点在Edge_info中的索引    如 ['Eg9']
+                    Vs_node = G_T.graph['Edge_info'].loc[
+                        Server_index[0], 'EdgeDestinationNode']  # Server节点的Vs节点            如 'Vs1'
+                    Vs_index = Edge_df[(
+                            Edge_df.EdgeSourceNode == Vs_node)].index.tolist()  # Vs节点的索引                      如['Eg13','Eg14','Eg15','Eg16']
+
+                    for i in Vs_index:
+                        node_i = G_T.graph['Edge_info'].loc[i, 'EdgeDestinationNode']  # vs的子节点  如 'V1'
+                        if G_T.graph['Node_info'].loc[node_i, 'NodeType'] == 'VM':
+                            fail_server_vm.append(node_i)
+                        else:
+                            pass
+
+                    VNF_list = []  # 故障VNF
+                    for VNFID, VNFDeployNode in G_T.graph['VNF_info'][
+                        'VNFDeployNode'].items():  # 如 'VNF!'      '[V1,V3]'   '[V2]'
+                        nodes = VNFDeployNode
+                        nodes = str(nodes).replace("[", '').replace("]", '')  # 去掉[]   如 'V1,V3'
+                        nodes = nodes.split(',')  # 如  ['V1', 'V3']
+
+                        tmp = [val for val in nodes if val in fail_server_vm]  # 交集
+                        if len(tmp) > 0:  # 有交集
+                            VNF_list.append(VNFID)
+                    # vnf_app = {}
+                    # for VNF_i in VNF_list:
+                    #     app_index = G_T.graph['Application_info'][(G_T.graph['Application_info'].ApplicationVNFs == VNF_i)].index.tolist()
+                    #     vnf_app[vnf] = app_index
+
+                    m = G_T.graph['Node_info'].loc[FailNode, 'NodeFailMT']  # 迁移时间
+
+                    for VNF_i in VNF_list:
+                        if G_T.graph['VNF_info'].loc[VNF_i, 'VNFBackupType'] == '主备':
+                            s = re.findall("\d+",
+                                           G_T.graph['VNF_info'].loc[VNF_i, 'VNFFailST'])  # 倒换时间(float(s[0]) / 3600)
+                            app_index = G_T.graph['Application_info'][(G_T.graph[
+                                                                           'Application_info'].ApplicationVNFs == VNF_i)].index.tolist()  # 故障VNF所在的业务    如 ['App1']
+                            for app_i in app_index:
+                                G_T.graph['Application_info'].loc[app_i, 'ApplicationDownTime'] += (
+                                        (float(s[0]) / 3600) + (m / 3600))
+
+                        elif G_T.graph['VNF_info'].loc[VNF_i, 'VNFBackupType'] == '2 Way':
+                            app_index = G_T.graph['Application_info'][(G_T.graph[
+                                                                           'Application_info'].ApplicationVNFs == VNF_i)].index.tolist()  # 故障VNF所在的业务    如 ['App1']
+                            if (set(G_T.graph['VNF_info']['VNFDeployNode'][VNF_i].replace('[', '').replace(']', '')
+                                            .split(',')).issubset(set(x['EvolFailNodesSet']))):  # 若0 way
+                                for app_i in app_index:
+                                    G_T.graph['Application_info'].loc[app_i, 'ApplicationStatus'] = 0
+                                    Downtime[app_i] = float(x['EvolTime'][0])
+                            else:  # 若 1 way
+                                pass
+
+                        else:  # 主机
+                            app_index = G_T.graph['Application_info'][(G_T.graph[
+                                                                           'Application_info'].ApplicationVNFs == VNF_i)].index.tolist()  # 故障VNF所在的业务    如 ['App1']
+                            for app_i in app_index:
+                                G_T.graph['Application_info'].loc[app_i, 'ApplicationStatus'] = 0
+                                Downtime[app_i] = float(x['EvolTime'][0])
+
+                    # 迁移策略
+
+                    server_list = G_T.graph['Node_info'][(G_T.graph['Node_info'].NodeIdle == 0) & (
+                            G_T.graph['Node_info'].NodeType == 'Server')].index.tolist()  # 空闲节点
+                    server = random.choice(server_list)  # 迁移后的server
+
+                    # 寻找迁移后的server子vm节点
+                    server_vm = []  # server子vm节点列表  如['V3', 'V4']
+                    Edge_df = G_T.graph['Edge_info']
+                    Server_index = Edge_df[
+                        (Edge_df.EdgeSourceNode == server)].index.tolist()  # Server节点在Edge_info中的索引    如 ['Eg9']
+                    Vs_node = G_T.graph['Edge_info'].loc[
+                        Server_index[0], 'EdgeDestinationNode']  # Server节点的Vs节点            如 'Vs1'
+                    Vs_index = Edge_df[(
+                            Edge_df.EdgeSourceNode == Vs_node)].index.tolist()  # Vs节点的索引                      如['Eg13','Eg14','Eg15','Eg16']
+
+                    for i in Vs_index:
+                        node_i = G_T.graph['Edge_info'].loc[i, 'EdgeDestinationNode']  # vs的子节点  如 'V1'
+                        if G_T.graph['Node_info'].loc[node_i, 'NodeType'] == 'VM':
+                            server_vm.append(node_i)
+                        else:
+                            pass
+
+                        # 更新VNF部署节点信息
+
+                        fail_server_vm = []  # Vs子vm节点列表  如['V1', 'V2']
+                        server_vm = []  # server子vm节点列表  如['V4', 'V5']
+
+                        for i in range(len(VNF_list)):
+                            DeployNode = G_T.graph['VNF_info'].loc[VNF_list[i], 'VNFDeployNode']  # 如 ['V1', 'V3']
+                            tmp1 = [val for val in fail_server_vm if val in DeployNode]  # 如 ['V1']
+                            update_DeployNode = DeployNode.replace(tmp1, server_vm[i])  # 如 ['V4', 'V3']
+
                 
                 if Nodetype == 'Vs':#故障节点为Vswitch
                     vSwitchFail(G_T, FailNode, x)
