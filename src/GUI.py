@@ -123,7 +123,7 @@ def GUI():
 '''
 测试用
 文件路径：
-D:\博士生资料\项目\2020.7 NFV项目\项目文档\程序\cloud-virtualization-network-reliabilty\test\file.xlsx
+C:\\cloud-virtualization-network-reliabilty\test\file.xlsx
 '''
 
 if __name__ == '__main__':
