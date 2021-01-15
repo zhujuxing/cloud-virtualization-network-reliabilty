@@ -6,10 +6,21 @@ Created on Thu Dec 31 05:34:57 2020
 """
 
 import networkx as nx
-import pandas as pd
 import os
 # import itertools
 from itertools import product
+import pandas as pd
+from tabulate import tabulate
+import numpy as np
+
+desired_width= 350
+
+pd.set_option('display.width', desired_width)
+
+np.set_printoptions(linewidth=desired_width)
+
+
+pd.set_option('display.max_columns',15)
 
 # 增加节点类型'Vs'
 class CloudVritualizedNetwork(nx.Graph):
@@ -109,13 +120,11 @@ class CloudVritualizedNetwork(nx.Graph):
         Application_info['ApplicationInitTraffic'] = 3.5
         Application_info['ApplicationTraffic'] = 1
         Application_info['ApplicationThreshold'] = 0
-        Application_info['ApplicationDownStartTime'] = 0
-        # Application_info['ApplicationVNFs'] = 'VNF2'
+        #Application_info['ApplicationDownStartTime'] = 0
         Application_info = Application_info.set_index('ApplicationID')
         # 计算业务物理路径
         Application_info['ApplicationDownTime'] = 0
-        Application_info['ApplicationWorkPath'] = str(['D1','T1','S1','Vs1','V2','Vs1',
-                                                    'S1','T1','D1'])
+        Application_info['ApplicationWorkPath'] = str([''])
 
         VNF_info['倒换控制链路'] = str([])   
         VNF_info = VNF_info.rename(columns={'VNF名称':'VNFID',
@@ -171,8 +180,12 @@ class CloudVritualizedNetwork(nx.Graph):
             df = df.append(ns,ignore_index=True)
         df.index = ['Eg%d'%(i+1) for i in range(len(edata))]
         # print(df)
-        return df        
-    
+        return df
+    def displayApp(self, g):
+        #print(tabulate(g.graph['Application_info']))
+        print('业务名称  业务逻辑路径     可用度  状态 初始流量 流量  阈值    中断时间      工作路径')
+        print(tabulate(g.graph['Application_info'], headers='firstrow'))
+
     def update_app_work_path(self):
         VNF_info = self.graph['VNF_info']
         def find_work_path(x,VNF_info):
@@ -206,6 +219,7 @@ def test():
     file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx'
     g = CloudVritualizedNetwork(file)
     # nx.write_gpickle(g,'g.gpickle')
+    g.displayApp()
     return g
 
 if __name__ == '__main__':
@@ -214,3 +228,9 @@ if __name__ == '__main__':
     ei = g.graph['Edge_info']
     vi = g.graph['VNF_info']
     ai = g.graph['Application_info']
+    #print(g.graph['Application_info']['ApplicationWorkPath'].to_string())
+    #print(tabulate(g.graph['Application_info']))
+
+
+    '''    pdtabulate = lambda df: tabulate(df, headers='keys', tablefmt='psql')
+    print(pdtabulate(g.graph['Application_info']['ApplicationWorkPath']))'''

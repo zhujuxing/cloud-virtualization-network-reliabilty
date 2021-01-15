@@ -52,6 +52,7 @@ def app_ava_cal(file,T,N):
     
     whole_app_avail = np.mean(single_app_avail['result'].to_list())
     print('整网业务可用度计算结果为：%f'%whole_app_avail)
+    g.displayApp(g)
     # return single_app_avail, whole_app_avail
     return single_app_avail,whole_app_avail
     
@@ -66,4 +67,4 @@ if __name__ == '__main__':
     t1 = time.time()
     single_app_avail,whole_app_avail = test()
     t2 = time.time()
-    print(t2-t1)
+    print("总用时： ", t2-t1)
