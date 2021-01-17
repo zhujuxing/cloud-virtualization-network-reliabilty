@@ -14,12 +14,8 @@ from tabulate import tabulate
 import numpy as np
 
 desired_width= 600
-
 pd.set_option('display.width', desired_width)
-
 np.set_printoptions(linewidth=desired_width)
-
-
 pd.set_option('display.max_columns',15)
 
 # 增加节点类型'Vs'
