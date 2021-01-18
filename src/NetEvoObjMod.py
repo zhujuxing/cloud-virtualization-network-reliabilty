@@ -13,10 +13,10 @@ import pandas as pd
 from tabulate import tabulate
 import numpy as np
 
-desired_width= 600
+desired_width= 1200
 pd.set_option('display.width', desired_width)
 np.set_printoptions(linewidth=desired_width)
-pd.set_option('display.max_columns',15)
+pd.set_option('display.max_columns',50)
 
 # 增加节点类型'Vs'
 class CloudVritualizedNetwork(nx.Graph):

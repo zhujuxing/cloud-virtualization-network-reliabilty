@@ -18,12 +18,14 @@ import random
 
 Uptime = {}  # 创建一个空字典，记录业务从故障状态转换到正常状态的时刻
 Downtime = {}  # 创建一个空字典，记录业务从正常状态转换到故障状态的时刻
+def printTime():
+    print('--------------Uptime: ', Uptime, 'Downtime: ', Downtime, '---------------')
 
 def net_evo_rul_ana_test(g, fname):
 
 
-    global G_T
-    G_T = copy.copy(g)
+    #global G_T
+    G_T = g
 
 
     if type(fname) == str:
@@ -36,7 +38,7 @@ def net_evo_rul_ana_test(g, fname):
 
     def rul_ana(x):
         #print( '\n---------------Start-------------\n')
-        print( x['EvolTime'], '  Reco:', x['EvolRecoNodesSet'], '   Fail:', x['EvolFailNodesSet'], '\n')
+        #print( x['EvolTime'], '  Reco:', x['EvolRecoNodesSet'], '   Fail:', x['EvolFailNodesSet'], '\n')
 
         # 修复节点怎么操作，对这个集合下的所有节点操作x['EvolRecoNodesSet']
         #for RecoNode in x['EvolRecoNodesSet']:#遍历演化态下的修复节点集
@@ -68,9 +70,14 @@ def net_evo_rul_ana_test(g, fname):
         #print('\n------------------------------\n')
     evol.apply(rul_ana,axis=1)
 
+    Uptime.clear()
+    Downtime.clear()
+
+
     return G_T
 
-
+def clearVar():
+    G_T.clear()
 #针对硬件故障节点，如DCGW，EOR，TOR的处理方式
 def hardwareFail(G_T, FailNode, x):
     for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
@@ -148,7 +155,7 @@ def VMFail(G_T, FailNode, x):
                                 # 将倒换时间加到业务不可用时间上
 
                                 s = re.findall("\d+", G_T.graph['VNF_info'].loc[VNFID, 'VNFFailST'])
-                                print("s:", s)
+                                #print("s:", s)
                                 G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (float(s[0]) / 3600)
                                 # 更改业务工作路径
                                 a = G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupNode'].replace("[", '').replace("]",
@@ -169,7 +176,7 @@ def VMFail(G_T, FailNode, x):
                                 '''
 
                                 G_T.graph['Application_info'].at[appID, 'ApplicationWorkPath'] = str(newPath)
-                                print('after set path:', G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath'])
+                                #print('after set path:', G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath'])
 
                                 #print('work path2:', G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath'])
                             else:
@@ -190,6 +197,7 @@ def VMFail(G_T, FailNode, x):
                                 continue
                 else:
                     continue
+
 
 def serverFail(G_T, FailNode, x):
     # continue
