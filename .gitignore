@@ -17,3 +17,12 @@ __pycache__/AppAvaCal.cpython-38.pyc
 *.xml
 *.xml
 *.xml
+__pycache__/NetEvoRulAna.cpython-38.pyc
+__pycache__/NetEvoObjMod.cpython-38.pyc
+__pycache__/NetEvoConGen.cpython-38.pyc
+__pycache__/AppAvaCal.cpython-38.pyc
+.idea/workspace.xml
+.idea/vcs.xml
+.idea/modules.xml
+.idea/misc.xml
+.idea/cloud-virtualization-network-reliabilty.iml

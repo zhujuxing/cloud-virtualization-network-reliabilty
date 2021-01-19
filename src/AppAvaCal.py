@@ -5,15 +5,15 @@ Created on Thu Dec 31 05:37:33 2020
 @author: zhujuxing
 """
 
-
-import networkx as nx
+# import networkx as nx
 import pandas as pd
 import numpy as np
 import NetEvoObjMod
 import NetEvoConGen
 import NetEvoRulAna
 import os
-
+import time
+import copy
 
 def app_ava_cal(file,T,N):
     """
@@ -40,9 +40,9 @@ def app_ava_cal(file,T,N):
     
     single_app_avail = pd.DataFrame(columns=[i+1 for i in range(N)])
     whole_app_avail = 0.0
-    g = NetEvoObjMod.net_evo_obj_mod(file)
+    g = NetEvoObjMod.CloudVritualizedNetwork(file)
     for i in range(N):
-        g_T = g.copy()
+        g_T = copy.copy(g)
         evol = NetEvoConGen.net_evo_con_gen(g_T,T)
         g_T= NetEvoRulAna.net_evo_rul_ana_test(g_T,evol) # 修改net_evo_rul_ana_test为正式版函数名
         single_app_avail[i+1] = g_T.graph['Application_info']['ApplicationDownTime'].apply(lambda x:1-(x/(T*365*24)))
@@ -52,15 +52,19 @@ def app_ava_cal(file,T,N):
     
     whole_app_avail = np.mean(single_app_avail['result'].to_list())
     print('整网业务可用度计算结果为：%f'%whole_app_avail)
+    g.displayApp(g)
     # return single_app_avail, whole_app_avail
     return single_app_avail,whole_app_avail
     
 
 def test():
-    T = 10
-    N = 5
-    file = os.getcwd()+os.sep+'test'+os.sep+'file.xlsx'
+    T = 100
+    N = 50
+    file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx'
     return app_ava_cal(file,T,N)
 
 if __name__ == '__main__':
+    t1 = time.time()
     single_app_avail,whole_app_avail = test()
+    t2 = time.time()
+    print("总用时： ", t2-t1)

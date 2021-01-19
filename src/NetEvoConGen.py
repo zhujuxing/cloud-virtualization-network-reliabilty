@@ -6,15 +6,15 @@ Created on Thu Dec 31 05:36:15 2020
 """
 
 import networkx as nx
-import pickle
 import pandas as pd
 import random
 import math
 import re
 import os
 import time
+from NetEvoObjMod import CloudVritualizedNetwork
 
-# 增加一个节点类型"Vs1" "Vswitch"
+
 def init(Gpath, T):
     '''
     读取gpickle.Gpath表示gpickle路径，Tset表示演化时长
@@ -23,10 +23,11 @@ def init(Gpath, T):
     Tset = T*365*24
     # gpickle转换成DataFrame
     if type(Gpath) == str:
-        with open(Gpath, 'rb') as fo:
-            G = pickle.load(fo, encoding='bytes')
+        # with open(Gpath, 'rb') as fo:
+        #     G = pickle.load(fo, encoding='bytes')
+        G = nx.read_gpickle(Gpath)
 
-    elif type(Gpath) == nx.Graph:
+    elif type(Gpath) == CloudVritualizedNetwork:
         G = Gpath
 
     node_info = pd.DataFrame([turple[1] for turple in G.nodes(data=True)])
@@ -281,7 +282,7 @@ def formating_data(evol):
         else:
             fail_nodes_set.remove(x['EvolRecoNodesSet'][0])
         return fail_nodes_set.copy()
-    evol1 = evol.copy()
+    # evol1 = evol.copy()
     evol['EvolFailNodesSet'] = evol.apply(to_fail_nodes_set,axis = 1)
     return evol
 
@@ -314,7 +315,7 @@ def test():
     # 仿真时间100年，单位小时
     t_start = time.time()
     T = 100
-    Gpath = os.getcwd()+os.sep+'test'+os.sep+'g.gpickle'
+    Gpath = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'g.gpickle'
     # Gpath = g
     evol = net_evo_con_gen(Gpath, T)
     evol.to_excel('evol.xlsx')
