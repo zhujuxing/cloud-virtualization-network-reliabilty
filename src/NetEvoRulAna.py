@@ -33,7 +33,7 @@ def net_evo_rul_ana_test(g, fname):
         evol['EvolTime'] = evol['EvolTime'].apply(eval)
         evol['EvolFailNodesSet'] = evol['EvolFailNodesSet'].apply(eval)
         evol['EvolRecoNodesSet'] = evol['EvolRecoNodesSet'].apply(eval)
-    elif type(fname)== pd.DataFrame:
+    elif type(fname) == pd.DataFrame:
         evol = fname
 
     def rul_ana(x):
@@ -76,8 +76,6 @@ def net_evo_rul_ana_test(g, fname):
 
     return G_T
 
-def clearVar():
-    G_T.clear()
 #针对硬件故障节点，如DCGW，EOR，TOR的处理方式
 def hardwareFail(G_T, FailNode, x):
     for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
@@ -304,6 +302,7 @@ def RecoNodes(G_T, appID, x):
     if (list(set(nodes).intersection(set(x['EvolFailNodesSet'])))) == []:
         G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 1
         Uptime[appID] = float(x['EvolTime'][0])
+
         G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
         G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] = G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'].round(7)
 
