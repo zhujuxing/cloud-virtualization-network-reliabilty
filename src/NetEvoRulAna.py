@@ -14,25 +14,32 @@ import copy
 import os
 import random
 #TODO: 将功能拆解为多个小块函数
+#TODO: 主备型重路由重新寻找VNF最短路径
 
 Uptime = {}  # 创建一个空字典，记录业务从故障状态转换到正常状态的时刻
 Downtime = {}  # 创建一个空字典，记录业务从正常状态转换到故障状态的时刻
+def printTime():
+    print('--------------Uptime: ', Uptime, 'Downtime: ', Downtime, '---------------')
 
 def net_evo_rul_ana_test(g, fname):
 
-    G_T = copy.copy(g)
+
+    #global G_T
+    G_T = g
+
+
     if type(fname) == str:
         evol = pd.read_excel(fname)
         evol['EvolTime'] = evol['EvolTime'].apply(eval)
         evol['EvolFailNodesSet'] = evol['EvolFailNodesSet'].apply(eval)
         evol['EvolRecoNodesSet'] = evol['EvolRecoNodesSet'].apply(eval)
-    elif type(fname)== pd.DataFrame:
+    elif type(fname) == pd.DataFrame:
         evol = fname
 
     def rul_ana(x):
         #print( '\n---------------Start-------------\n')
-        #print(x)
-        nonlocal G_T       
+        #print( x['EvolTime'], '  Reco:', x['EvolRecoNodesSet'], '   Fail:', x['EvolFailNodesSet'], '\n')
+
         # 修复节点怎么操作，对这个集合下的所有节点操作x['EvolRecoNodesSet']
         #for RecoNode in x['EvolRecoNodesSet']:#遍历演化态下的修复节点集
 
@@ -63,8 +70,11 @@ def net_evo_rul_ana_test(g, fname):
         #print('\n------------------------------\n')
     evol.apply(rul_ana,axis=1)
 
-    return G_T
+    Uptime.clear()
+    Downtime.clear()
 
+
+    return G_T
 
 #针对硬件故障节点，如DCGW，EOR，TOR的处理方式
 def hardwareFail(G_T, FailNode, x):
@@ -141,7 +151,9 @@ def VMFail(G_T, FailNode, x):
 
                             if (VNFID in VNFs):
                                 # 将倒换时间加到业务不可用时间上
+
                                 s = re.findall("\d+", G_T.graph['VNF_info'].loc[VNFID, 'VNFFailST'])
+                                #print("s:", s)
                                 G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (float(s[0]) / 3600)
                                 # 更改业务工作路径
                                 a = G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupNode'].replace("[", '').replace("]",
@@ -150,9 +162,21 @@ def VMFail(G_T, FailNode, x):
                                 b = G_T.graph['VNF_info'].loc[VNFID, 'VNFDeployNode'].replace("[", '').replace("]",
                                                                                                                '').join(
                                     '\'\'')
+
+
+                                newPath = shortestPath(G_T, b)
+                                #print('newPath:',     newPath)
+
+                                '''
                                 G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath'] = \
                                     G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath'].join(
                                         '\'\'').replace(a, b).strip('\'')
+                                '''
+
+                                G_T.graph['Application_info'].at[appID, 'ApplicationWorkPath'] = str(newPath)
+                                #print('after set path:', G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath'])
+
+                                #print('work path2:', G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath'])
                             else:
                                 continue
 
@@ -171,6 +195,7 @@ def VMFail(G_T, FailNode, x):
                                 continue
                 else:
                     continue
+
 
 def serverFail(G_T, FailNode, x):
     # continue
@@ -277,6 +302,7 @@ def RecoNodes(G_T, appID, x):
     if (list(set(nodes).intersection(set(x['EvolFailNodesSet'])))) == []:
         G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 1
         Uptime[appID] = float(x['EvolTime'][0])
+
         G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
         G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] = G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'].round(7)
 
@@ -309,18 +335,21 @@ def RecoNodes(G_T, appID, x):
         else:
             pass
 
-
+def shortestPath(g, targetNode):
+    targetNode = targetNode.strip('\'')
+    shortestPath = nx.shortest_path(g, source= "D1", target= targetNode )
+    reversePath = shortestPath.copy()
+    reversePath.reverse()
+    #print(type(reversePath))
+    shortestPath.extend(reversePath)
+    #print("Shortest path: ", shortestPath)
+    return shortestPath
 
 if __name__ == '__main__':
     g = CloudVritualizedNetwork(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx')
     fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+ 'newData/evol3.xlsx'
     g_t = net_evo_rul_ana_test(g, fname)
     g.displayApp(g)
-
-    print("\nApp Down Start time: ", Downtime)
-    print("App Up Start time: ", Uptime)
-    print("App Total Downtime: ", round(g.graph['Application_info'].loc['App1', 'ApplicationDownTime'], 5))
-    print("App Total Downtime: ", round(g.graph['Application_info'].loc['App2', 'ApplicationDownTime'], 5))
     #for i in range(100):
 #        g_T = g.copy()
 #        fname = NetEvoConGen.net_evo_con_gen(g_T,10)

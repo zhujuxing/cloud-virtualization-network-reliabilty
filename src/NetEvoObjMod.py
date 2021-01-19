@@ -13,14 +13,10 @@ import pandas as pd
 from tabulate import tabulate
 import numpy as np
 
-desired_width= 350
-
+desired_width= 1200
 pd.set_option('display.width', desired_width)
-
 np.set_printoptions(linewidth=desired_width)
-
-
-pd.set_option('display.max_columns',15)
+pd.set_option('display.max_columns',50)
 
 # 增加节点类型'Vs'
 class CloudVritualizedNetwork(nx.Graph):
@@ -181,10 +177,10 @@ class CloudVritualizedNetwork(nx.Graph):
         df.index = ['Eg%d'%(i+1) for i in range(len(edata))]
         # print(df)
         return df
-    def displayApp(self, g):
+    def displayApp(self):
         #print(tabulate(g.graph['Application_info']))
-        print('业务名称  业务逻辑路径     可用度  状态 初始流量 流量  阈值    中断时间      工作路径')
-        print(tabulate(g.graph['Application_info'], headers='firstrow'))
+        #print('业务名称  业务逻辑路径     可用度  状态 初始流量 流量  阈值    中断时间      工作路径')
+        print(tabulate(self.graph['Application_info'], headers=['业务名称',  '    业务逻辑路径','可用度','  状态', '   初始流量', '     流量',  '     阈值','      中断时间','           工作路径']), '\n')
 
     def update_app_work_path(self):
         VNF_info = self.graph['VNF_info']
