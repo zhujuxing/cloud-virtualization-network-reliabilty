@@ -325,6 +325,8 @@ def shortestPath(g, targetNode):
     shortestPath.extend(reversePath)
     return shortestPath
 
+# TODO:增加一个输出对每个演化态，哪些业务故障故障，故障多少时间。
+
 if __name__ == '__main__':
     g = CloudVritualizedNetwork(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx')
     fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep + 'newData/evol3.xlsx'
