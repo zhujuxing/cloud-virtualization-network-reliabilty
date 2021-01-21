@@ -50,7 +50,8 @@ def net_evo_rul_ana_test(g, fname):
                     hardwareFail(G_T, FailNode, x)
 
                 if Nodetype == 'S':#故障节点为Server
-                    serverFail(G_T, FailNode, x)
+                    #serverFail(G_T, FailNode, x)
+                    pass
                 
                 if Nodetype == 'Vs':#故障节点为Vswitch
                     vSwitchFail(G_T, FailNode, x)
@@ -59,6 +60,8 @@ def net_evo_rul_ana_test(g, fname):
                     VMFail(G_T, FailNode, x)
 
     evol.apply(rul_ana,axis=1)
+    # print(Uptime)
+    # print(Downtime)
     Uptime.clear()
     Downtime.clear()
 
@@ -78,7 +81,7 @@ def hardwareFail(G_T, FailNode, x):
                 continue
 
 def vSwitchFail(G_T, FailNode, x):
-    Nodetype = ''.join(re.findall(r'[A-Za-z]', FailNode))
+    #Nodetype = ''.join(re.findall(r'[A-Za-z]', FailNode))
     for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
         if status == 0:
             continue
@@ -147,7 +150,7 @@ def VMFail(G_T, FailNode, x):
                                                                                                                '').join(
                                     '\'\'')
                                 #print('backup node:', a, 'deploy node:', b)
-                                newPath = shortestPath(G_T, a)
+                                newPath = shortestPath(G_T, b)
 
                                 '''
                                 G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath'] = \
@@ -327,6 +330,7 @@ def shortestPath(g, targetNode):
 
 if __name__ == '__main__':
     g = CloudVritualizedNetwork(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx')
+    #g.displayApp()
     fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep + 'newData/evol3.xlsx'
     g_t = net_evo_rul_ana_test(g, fname)
     g.displayApp()
