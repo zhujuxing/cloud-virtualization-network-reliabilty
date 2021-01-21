@@ -72,12 +72,8 @@ def net_evo_rul_ana_test(g, fname):
                     VMFail(G_T, FailNode, x)
 
     evol.apply(rul_ana,axis=1)
-<<<<<<< HEAD
     # print(Uptime)
     # print(Downtime)
-=======
-
->>>>>>> 4ed3f9af96a31dd7bb029901eb81b39a7a288c1d
     Uptime.clear()
     Downtime.clear()
 
@@ -358,25 +354,22 @@ def RecoNodes(G_T, appID, x):
         app_fail_VNFnodes = []
         i = 0
         for VNFID in VNFs:
-            try:
-                if G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupType'] == '2 Way':
-                    VNFnodesSet = G_T.graph['VNF_info'].loc[VNFID, 'VNFDeployNodes'].replace("[", '').replace("]",
-                                                                                                              '').split(
-                        ',')
-                    if (list(set(App_fail_node).intersection(set(VNFnodesSet))) == VNFnodesSet):  #
-                        break
-                    else:
-                        # 记录下业务VNF中故障的节点
-                        app_fail_VNFnodes = list(
-                            set((set(App_fail_node).intersection(set(VNFnodesSet)))).union(set(app_fail_VNFnodes)))
-                        i = i + 1
+            if G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupType'] == '2 Way':
+                VNFnodesSet = G_T.graph['VNF_info'].loc[VNFID, 'VNFDeployNode'].replace("[", '').replace("]",'').split(',')                                                                                       
+                if (list(set(App_fail_node).intersection(set(VNFnodesSet))) == VNFnodesSet):  #
+                    break
                 else:
-                    pass
-            except:
+                    # 记录下业务VNF中故障的节点
+                    app_fail_VNFnodes = list(
+                        set((set(App_fail_node).intersection(set(VNFnodesSet)))).union(set(app_fail_VNFnodes)))
+                    i = i + 1
+            else:
                 pass
         if list(set(app_fail_VNFnodes).difference(set(x['EvolFailNodesSet']))) == [] and i == len(VNFs):
             G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 1
             Uptime[appID] = float(x['EvolTime'][0])
+            G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
+            G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] = G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'].round(7)
         else:
             pass
 
@@ -392,7 +385,7 @@ def shortestPath(g, targetNode):
 
 if __name__ == '__main__':
     g = CloudVritualizedNetwork(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx')
-    #g.displayApp()
+    g.displayApp()
     fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep + 'newData/evol3.xlsx'
     g_t = net_evo_rul_ana_test(g, fname)
     g.displayApp()
