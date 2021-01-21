@@ -12,11 +12,18 @@ import NetEvoConGen
 from NetEvoObjMod import CloudVritualizedNetwork
 import copy
 import os
+import openpyxl
+import collections
+from openpyxl import load_workbook
 import random
 #TODO: shortestPath 函数中都是从D1寻找至新VNF的路径，考虑后续是否要通过其它DCGW走
 
 Uptime = {}  # 创建一个空字典，记录业务从故障状态转换到正常状态的时刻
 Downtime = {}  # 创建一个空字典，记录业务从正常状态转换到故障状态的时刻
+
+Uplist = []
+Downlist = []
+sheetNum = 0
 
 def net_evo_rul_ana_test(g, fname):
 
@@ -38,6 +45,11 @@ def net_evo_rul_ana_test(g, fname):
                 continue
             if status == 0:
                 RecoNodes(G_T, appID, x)
+                for key, value in Uptime.items():
+                    Uplist.append((key, value))
+                for key, value in Downtime.items():
+                    Downlist.append((key, value))
+
 
         for FailNode in x['EvolFailNodesSet']:#遍历演化态下的故障节点集
             if FailNode[:2] != 'Vs':
@@ -59,10 +71,54 @@ def net_evo_rul_ana_test(g, fname):
                     VMFail(G_T, FailNode, x)
 
     evol.apply(rul_ana,axis=1)
+
     Uptime.clear()
     Downtime.clear()
 
     return G_T
+
+def clearVar():
+    sheetNum = 0
+    Uplist.clear()
+    Downlist.clear()
+
+
+def printLog():
+    global Uplist
+    global Downlist
+    global sheetNum
+    sheetName = 'Sheet' + str(sheetNum)
+    Uplist = list(dict.fromkeys(Uplist))
+    Downlist = list(dict.fromkeys(Downlist))
+
+    upDF = pd.DataFrame(Uplist, columns=['AppName2', 'Up Time'])
+    upDF = upDF.sort_values(by=['AppName2', 'Up Time'])
+    upDF.reset_index(drop=True, inplace=True)
+
+    downDF = pd.DataFrame(Downlist, columns=['AppName', 'Down Time'])
+    downDF = downDF.sort_values(by=['AppName', 'Down Time'])
+    downDF.reset_index(drop=True, inplace=True)
+
+    appDownTimeDF = pd.concat([downDF, upDF], axis=1)
+    appDownTimeDF = appDownTimeDF.drop(columns=['AppName2'])
+
+    print(appDownTimeDF.to_string(index=False))
+    fileName = os.path.abspath(os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'AppDownTimeLog.xlsx'
+    if os.path.isfile(fileName):
+        pass
+    else:
+        wb = openpyxl.Workbook()
+        wb.save(fileName)
+    with pd.ExcelWriter(fileName,engine="openpyxl",mode='a') as writer:
+        appDownTimeDF.to_excel(writer, sheet_name=sheetName)
+
+    Uplist.clear()
+    Downlist.clear()
+    upDF.iloc[0:0]
+    downDF.iloc[0:0]
+    appDownTimeDF.iloc[0:0]
+
+
 
 #针对硬件故障节点，如DCGW，EOR，TOR的处理方式
 def hardwareFail(G_T, FailNode, x):
@@ -288,6 +344,7 @@ def RecoNodes(G_T, appID, x):
         G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (Uptime[appID] - Downtime[appID])
         G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] = G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'].round(7)
 
+
     else:  # 如果修复节点中有nway型VNF的节点，则该VNF中有一个节点恢复，该VNF就可用。
         App_fail_node = list(set(nodes).intersection(set(x['EvolFailNodesSet'])))
         VNFs = G_T.graph['Application_info'].loc[appID, 'ApplicationVNFs'].strip('[]').split(',')
@@ -332,3 +389,9 @@ if __name__ == '__main__':
     fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep + 'newData/evol3.xlsx'
     g_t = net_evo_rul_ana_test(g, fname)
     g.displayApp()
+    printLog()
+
+
+
+
+
