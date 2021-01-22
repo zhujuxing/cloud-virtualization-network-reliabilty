@@ -15,7 +15,7 @@ import os
 import pandas as pd
 
 # 测试T取值
-T = 1000
+T = 100
 Gpath = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'g.gpickle'
 
 #%% --单构件单故障模式
@@ -72,6 +72,7 @@ test_node_info2['MTBF_mode_cal'] = temp
 
 
 #%% --多构件多故障模式
-
+T = 1000
+evol = net_evo_con_gen(Gpath, T)
 
 #%% --T值的不同取值
