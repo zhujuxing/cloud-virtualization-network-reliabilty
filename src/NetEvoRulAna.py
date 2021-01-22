@@ -28,6 +28,7 @@ sheetNum = 0
 def net_evo_rul_ana_test(g, fname):
 
     G_T = g
+    g.displayApp()
 
 
     if type(fname) == str:
@@ -62,8 +63,7 @@ def net_evo_rul_ana_test(g, fname):
                     hardwareFail(G_T, FailNode, x)
 
                 if Nodetype == 'S':#故障节点为Server
-                    #serverFail(G_T, FailNode, x)
-                    pass
+                    serverFail(G_T, FailNode, x)
                 
                 if Nodetype == 'Vs':#故障节点为Vswitch
                     vSwitchFail(G_T, FailNode, x)
@@ -415,9 +415,10 @@ def testRulAna(gName, evolName):
 
 if __name__ == '__main__':
     g = CloudVritualizedNetwork(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx')
-    fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep + 'newData/evol3.xlsx'
+    fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep + 'RulAnaTestFile/evol3.xlsx'
     g_t = net_evo_rul_ana_test(g, fname)
     g.displayApp()
+    printLog()
 
 
 
