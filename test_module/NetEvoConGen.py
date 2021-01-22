@@ -79,11 +79,13 @@ def fail_state(x, T, node_info):
     reco_time = []
 
     fail_dt = node_info[node_info['NodeID'] == x['NodeID']] 
+    if x['NodeID']=='D1':
+        print('************'+str(len(fail_dt)))
     fail_time = [[] for i in range(len(fail_dt))]
     reco_time = [[] for i in range(len(fail_dt))]
     i = 0
     for row in fail_dt.iterrows():
-        t = 0 
+        t = 0
         MTBF = convert(row[1]['NodeFailMTBF'])
         FDR = convert(row[1]['NodeFailFDR'])
         FDT = convert(row[1]['NodeFailFDT'])
@@ -159,7 +161,7 @@ def singleFR(node_info, T):
     # global node_info1
     # 节点列属性添加失效、修复时间，属性值为[时间点列表]。
     node_info1 = node_info.copy()
-    # 去除重复行,覆盖输入的df参数
+    # 去除重复行
     node_info1.drop_duplicates(['NodeID'], inplace=True, ignore_index=True)
     return node_info1
 
@@ -338,7 +340,5 @@ if __name__ == '__main__':
         return evol
     
     evol = test()
-    # 测验演化态中的V6节点出现规律
-    print(evol.loc[evol['EvolFailNodesSet'].isin([['V6'],])])
     # print(node_info_show)
     
