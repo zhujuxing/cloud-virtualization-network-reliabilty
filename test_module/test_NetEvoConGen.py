@@ -72,7 +72,49 @@ test_node_info2['MTBF_mode_cal'] = temp
 
 
 #%% --多构件多故障模式
-T = 1000
-evol = net_evo_con_gen(Gpath, T)
+T = 100
+# node_info_show = node_info
+
+T, node_info = init(Gpath, T)
+    # node_info_show = node_info
+test_node_info = singleFR(node_info1, T).loc[0:3, ['NodeID', 'NodeType', 'FailureTime',
+                                                    'NodeFailMTBF', 'NodeFailMTTR']]
+test_node_info1 = test_node_info.copy(deep=True)
+new_fail_mode = node_info1.copy(deep=True).loc[0:1, :]
+# print(new_fail_mode)
+new_fail_mode['NodeFailMTBF'] = '50年'
+new_fail_mode['NodeFailType'] = 'TF2'
+node_info2 = pd.concat([new_fail_mode, node_info1], axis=0, ignore_index=True)
+
+test_node_info2 = singleFR(node_info2, T).loc[0:3, ['NodeID', 'NodeType', 'FailureTime', 'RepairTime',
+                                                    'NodeFailMTBF', 'NodeFailMTTR']]    
+
+test_node_info2 = common_ex(test_node_info2)
+time_set = time_set_gen(test_node_info2)
+# evol = Con_gen()
+evol = Con_gen(test_node_info2,T,time_set)
+evol = formating_data(evol)
+
 
 #%% --T值的不同取值
+for i in range(100,1000,100):
+    T=i
+    T, node_info = init(Gpath, T)
+    # node_info_show = node_info
+    test_node_info = singleFR(node_info1, T).loc[0:3, ['NodeID', 'NodeType', 'FailureTime',
+                                                    'NodeFailMTBF', 'NodeFailMTTR']]
+    test_node_info1 = test_node_info.copy(deep=True)
+    new_fail_mode = node_info1.copy(deep=True).loc[0:1, :]
+# print(new_fail_mode)
+    new_fail_mode['NodeFailMTBF'] = '50年'
+    new_fail_mode['NodeFailType'] = 'TF2'
+    node_info2 = pd.concat([new_fail_mode, node_info1], axis=0, ignore_index=True)
+  
+    test_node_info2 = singleFR(node_info2, T).loc[0:3, ['NodeID', 'NodeType', 'FailureTime', 'RepairTime',
+                                                    'NodeFailMTBF', 'NodeFailMTTR']]    
+
+    test_node_info2 = common_ex(test_node_info2)
+    time_set = time_set_gen(test_node_info2)
+# evol = Con_gen()
+    evol = Con_gen(test_node_info2,T,time_set)
+    evol= formating_data(evol)
