@@ -338,5 +338,7 @@ if __name__ == '__main__':
         return evol
     
     evol = test()
+    # 测验演化态中的V6节点出现规律
+    print(evol.loc[evol['EvolFailNodesSet'].isin([['V6'],])])
     # print(node_info_show)
     

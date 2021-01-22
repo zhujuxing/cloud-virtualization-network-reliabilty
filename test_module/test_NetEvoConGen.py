@@ -15,12 +15,13 @@ import os
 import pandas as pd
 
 # 测试T取值
-T = 2000
+T = 1000
 Gpath = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'g.gpickle'
 
 #%% --单构件单故障模式
 
 T, node_info1 = init(Gpath, T)
+# 选取测试节点
 test_node_info = singleFR(node_info1, T).loc[0:3, ['NodeID', 'NodeType', 'FailureTime',
                                                     'NodeFailMTBF', 'NodeFailMTTR']]
 # print(test_node_info)
@@ -49,9 +50,10 @@ test_node_info1['MTBF_cal'] = temp
 #%% --单构件多故障模式
 
 # node_info1前两项复制，加到node_info2里，用node_info2做多模式验证
-new_fail_mode = node_info1.loc[0:1, :]
+new_fail_mode = node_info1.copy(deep=True).loc[0:1, :]
 # print(new_fail_mode)
 new_fail_mode['NodeFailMTBF'] = '50年'
+new_fail_mode['NodeFailType'] = 'TF2'
 node_info2 = pd.concat([new_fail_mode, node_info1], axis=0, ignore_index=True)
 
 test_node_info2 = singleFR(node_info2, T).loc[0:3, ['NodeID', 'NodeType', 'FailureTime', 'RepairTime',
