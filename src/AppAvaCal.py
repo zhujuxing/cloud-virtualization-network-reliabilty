@@ -48,7 +48,7 @@ def app_ava_cal(file,T,N):
         g_T= NetEvoRulAna.net_evo_rul_ana_test(g_T,evol) # 修改net_evo_rul_ana_test为正式版函数名
         single_app_avail[i+1] = g_T.graph['Application_info']['ApplicationDownTime'].apply(lambda x:1-(x/(T*365*24)))
         g_T.displayApp()
-        NetEvoRulAna.printLog()
+        NetEvoRulAna.saveLog()
     NetEvoRulAna.clearVar()
 
     single_app_avail['result'] = single_app_avail.apply(np.mean, axis=1)

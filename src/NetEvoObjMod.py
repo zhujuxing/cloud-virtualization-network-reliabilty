@@ -177,6 +177,7 @@ class CloudVritualizedNetwork(nx.Graph):
         df.index = ['Eg%d'%(i+1) for i in range(len(edata))]
         # print(df)
         return df
+
     def displayApp(self):
         #print(tabulate(g.graph['Application_info']))
         #print('业务名称  业务逻辑路径     可用度  状态 初始流量 流量  阈值    中断时间      工作路径')
@@ -186,7 +187,13 @@ class CloudVritualizedNetwork(nx.Graph):
         VNF_info = self.graph['VNF_info']
         def find_work_path(x,VNF_info):
             logic_path = x['ApplicationVNFs']
-            logic_path = logic_path.strip('[]').split(',')
+            print('logic_path', logic_path)
+            print('lp type', type(logic_path))
+            logic_path = str(logic_path)
+            try:
+                logic_path = logic_path.strip('[]').split(',')
+            except:
+                pass
             # entrance_device = logic_path[0]
             # exit_device = logic_path[-1]
             # logic_path = logic_path[1:-1]
@@ -204,10 +211,10 @@ class CloudVritualizedNetwork(nx.Graph):
                     target = target.strip('[]').split(',')
                 else:
                     target = [target]
-                for j,k in product(source,target):
+                for j, k in product(source,target):
                     work_path.extend(nx.shortest_path(self,j,k))
             return str(work_path)
-        value = self.graph['Application_info'].apply(lambda x:find_work_path(x,VNF_info),axis = 1)
+        value = self.graph['Application_info'].apply(lambda x: find_work_path(x, VNF_info), axis=1)
         self.graph['Application_info']['ApplicationWorkPath'] = value
     
 

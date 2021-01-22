@@ -84,7 +84,6 @@ def clearVar():
     Uplist.clear()
     Downlist.clear()
 
-
 def printLog():
     global Uplist
     global Downlist
@@ -105,6 +104,34 @@ def printLog():
     appDownTimeDF = appDownTimeDF.drop(columns=['AppName2'])
 
     print(appDownTimeDF.to_string(index=False))
+
+    Uplist.clear()
+    Downlist.clear()
+    upDF.iloc[0:0]
+    downDF.iloc[0:0]
+    appDownTimeDF.iloc[0:0]
+
+def saveLog():
+    global Uplist
+    global Downlist
+    global sheetNum
+    sheetName = 'Sheet' + str(sheetNum)
+    Uplist = list(dict.fromkeys(Uplist))
+    Downlist = list(dict.fromkeys(Downlist))
+
+    upDF = pd.DataFrame(Uplist, columns=['AppName2', 'Up Time'])
+    upDF = upDF.sort_values(by=['AppName2', 'Up Time'])
+    upDF.reset_index(drop=True, inplace=True)
+
+    downDF = pd.DataFrame(Downlist, columns=['AppName', 'Down Time'])
+    downDF = downDF.sort_values(by=['AppName', 'Down Time'])
+    downDF.reset_index(drop=True, inplace=True)
+
+    appDownTimeDF = pd.concat([downDF, upDF], axis=1)
+    appDownTimeDF = appDownTimeDF.drop(columns=['AppName2'])
+
+    print(appDownTimeDF.to_string(index=False))
+
     fileName = os.path.abspath(os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'AppDownTimeLog.xlsx'
     if os.path.isfile(fileName):
         pass
@@ -381,15 +408,18 @@ def shortestPath(g, targetNode):
     shortestPath.extend(reversePath)
     return shortestPath
 
-# TODO:增加一个输出对每个演化态，哪些业务故障故障，故障多少时间。
+def testRulAna(gName, evolName):
+    g_t = net_evo_rul_ana_test(gName, evolName)
+    appAvaData = g_t.graph['Application_info'][['ApplicationDownTime']]
+    return appAvaData
 
 if __name__ == '__main__':
     g = CloudVritualizedNetwork(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx')
-    g.displayApp()
     fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep + 'newData/evol3.xlsx'
     g_t = net_evo_rul_ana_test(g, fname)
     g.displayApp()
-    printLog()
+
+
 
 
 
