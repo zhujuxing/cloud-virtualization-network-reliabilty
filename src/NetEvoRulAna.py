@@ -334,6 +334,8 @@ def serverFail(G_T, FailNode, x):
             update_DeployNode = DeployNode.replace(tmp1[0], server_vm[i])  # 如 ['V5', 'V3']
             VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode  # 更新VNFDeployNode
 
+        
+
         # 获取故障VNF对应的app
         dict_VNF_app = {}  # {'VNF1': ['App2', 'App3'], 'VNF2': ['App1']}
         app_index_list = app_df.index.tolist()  # 所有app索引  ['App1', 'App2', 'App3']
@@ -440,21 +442,26 @@ def serverFail(G_T, FailNode, x):
                         pass
 
         elif type == 3:  # 无主备型
-            if set(VNF_df['VNFBackupNode'][VNF_i].strip('[]').split(',')).issubset(set(x['EvolFailNodesSet'])):  # 若备断了
-                if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主机':
-                    App_list = dict_VNF_app[VNF_i]  # ['App1']
-                    for App_i in App_list:
-                        # 业务中断时间为迁移时间
-                        app_df.loc[App_i, 'ApplicationDownTime'] += m
-                else:  # 2way
-                    if len(list(set(VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')).intersection(
-                            set(x['EvolFailNodesSet'])))) > 0:  # 交集不为空，0 way
-                        App_list = dict_VNF_app[VNF_i]  # ['App1']
-                        for App_i in App_list:
-                            # 业务中断时间为倒换+迁移时间
-                            app_df.loc[App_i, 'ApplicationDownTime'] += m
-                    else:  # 1way
-                        pass
+            for VNF_i in VNF_list:
+                try:
+                    # TODO:修复bug
+                    if set(VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')).issubset(set(x['EvolFailNodesSet'])):  # 若备断了
+                        if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主机':
+                            App_list = dict_VNF_app[VNF_i]  # ['App1']
+                            for App_i in App_list:
+                                # 业务中断时间为迁移时间
+                                app_df.loc[App_i, 'ApplicationDownTime'] += m
+                        else:  # 2way
+                            if len(list(set(VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')).intersection(
+                                    set(x['EvolFailNodesSet'])))) > 0:  # 交集不为空，0 way
+                                App_list = dict_VNF_app[VNF_i]  # ['App1']
+                                for App_i in App_list:
+                                    # 业务中断时间为倒换+迁移时间
+                                    app_df.loc[App_i, 'ApplicationDownTime'] += m
+                            else:  # 1way
+                                pass
+                except:
+                    pass
 
 
 def RecoNodes(G_T, appID, x):
