@@ -303,8 +303,9 @@ def serverFail(G_T, FailNode, x):
         # 按节点单独故障处理
         vSwitchFail(G_T, Vs_node, x)
         for vm_i in fail_server_vm:
+            x['EvolFailNodesSet'].append(vm_i)   # 更新故障节点集
+        for vm_i in fail_server_vm:
             VMFail(G_T, vm_i, x)
-
     else:  # 有空闲server
         server = random.choice(server_list)  # 迁移后的server    如'S3'
         m = node_df.loc[FailNode, 'NodeFailMT']  # 迁移时间 h
@@ -334,7 +335,6 @@ def serverFail(G_T, FailNode, x):
             update_DeployNode = DeployNode.replace(tmp1[0], server_vm[i])  # 如 ['V5', 'V3']
             VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode  # 更新VNFDeployNode
 
-        
 
         # 获取故障VNF对应的app
         dict_VNF_app = {}  # {'VNF1': ['App2', 'App3'], 'VNF2': ['App1']}
@@ -445,7 +445,6 @@ def serverFail(G_T, FailNode, x):
             for VNF_i in VNF_list:
                 try:
                     # TODO:修复bug
-                    if set(VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')).issubset(set(x['EvolFailNodesSet'])):  # 若备断了
                         if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主机':
                             App_list = dict_VNF_app[VNF_i]  # ['App1']
                             for App_i in App_list:

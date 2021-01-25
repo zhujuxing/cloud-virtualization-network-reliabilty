@@ -45,8 +45,11 @@
     <option name="width" value="720" />
     <option name="height" value="877" />
   </component>
+  <component name="ProjectId" id="1nYC6tWwHJllHrP9hp6bDQFOCdE" />
   <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SearchEverywhereHistoryKey" value="evol&#9;null&#9;null" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.path.for.package.tslint" value="project" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
@@ -199,6 +202,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1609742914366</updated>
+      <workItem from="1611557468437" duration="97000" />
     </task>
     <servers />
   </component>
@@ -210,6 +214,9 @@
       <are-packages-shown value="true" />
       <is-autoscroll-to-source value="true" />
     </todo-panel>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
     <state width="1397" height="329" key="GridCell.Tab.0.bottom" timestamp="1610541293047">
@@ -244,6 +251,10 @@
       <screen x="0" y="0" width="1440" height="920" />
     </state>
     <state width="1397" height="329" key="GridCell.Tab.1.right/0.0.1440.920/2160.0.1920.1040@0.0.1440.920" timestamp="1610541293047" />
+    <state x="404" y="312" key="com.intellij.ide.util.TipDialog" timestamp="1611557476298">
+      <screen x="0" y="0" width="1440" height="920" />
+    </state>
+    <state x="404" y="312" key="com.intellij.ide.util.TipDialog/0.0.1440.920@0.0.1440.920" timestamp="1611557476298" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
