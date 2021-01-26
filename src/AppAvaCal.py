@@ -63,8 +63,9 @@ def app_ava_cal(file,T,N):
     
 
 def test_T():
-    N = 100
-    file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx'
+    N = 10
+    # file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx'
+    file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+"file_128server.xlsx"
     result = pd.DataFrame()
     for T in [10,20,50,100,200]:
         t1 = time.time()
@@ -93,4 +94,4 @@ def test_N():
 
 if __name__ == '__main__':
     result_T = test_T()
-    result_N = test_N()
+    # result_N = test_N()

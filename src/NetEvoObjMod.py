@@ -231,8 +231,6 @@ if __name__ == '__main__':
     ei = g.graph['Edge_info']
     vi = g.graph['VNF_info']
     ai = g.graph['Application_info']
-    #print(g.graph['Application_info']['ApplicationWorkPath'].to_string())
-    #print(tabulate(g.graph['Application_info']))
 
 
     '''    pdtabulate = lambda df: tabulate(df, headers='keys', tablefmt='psql')
