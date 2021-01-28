@@ -332,7 +332,10 @@ def serverFail(G_T, FailNode, x):
         for i in range(len(VNF_list)):  # 故障VNF  如['VNF1', 'VNF2']
             DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # 如 '[V1,V3]'
             tmp1 = [val for val in fail_server_vm if val in DeployNode]  # 如 ['V1']
-            update_DeployNode = DeployNode.replace(tmp1[0], server_vm[i])  # 如 ['V5', 'V3']
+            try:
+                update_DeployNode = DeployNode.replace(tmp1[0], server_vm[i])  # 如 ['V5', 'V3']
+            except:
+                pass
             VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode  # 更新VNFDeployNode
 
 
@@ -444,7 +447,6 @@ def serverFail(G_T, FailNode, x):
         elif type == 3:  # 无主备型
             for VNF_i in VNF_list:
                 try:
-                    # TODO:修复bug
                         if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主机':
                             App_list = dict_VNF_app[VNF_i]  # ['App1']
                             for App_i in App_list:
