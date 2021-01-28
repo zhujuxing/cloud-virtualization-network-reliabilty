@@ -270,7 +270,7 @@ def serverFail(G_T, FailNode, x):
     edge_df = G_T.graph['Edge_info']
     node_df = G_T.graph['Node_info']
 
-    # 获取故障server的vm节点列表fail_server_vm
+    # 获取故障server的vm列表fail_server_vm
     fail_server_vm = []  # Vs子vm节点列表  如['V1', 'V2']
     Server_index = edge_df[(edge_df.EdgeSourceNode == FailNode)].index.tolist()  # Server节点在Edge_info中的索引    如 ['Eg9']
     Vs_node = G_T.graph['Edge_info'].loc[Server_index[0], 'EdgeDestinationNode']  # Server节点的Vs节点            如 'Vs1'
@@ -282,22 +282,30 @@ def serverFail(G_T, FailNode, x):
             fail_server_vm.append(node_i)
         else:
             pass
-
-    # 获取故障VNF列表 VNF_list
+    # 获取故障server涉及的VNF列表  VNF_list
     VNF_list = []  # 故障VNF   ['VNF1', 'VNF2']
     for VNFID, VNFDeployNode in G_T.graph['VNF_info']['VNFDeployNode'].items():  # 如 'VNF!' '[V1,V3]'   '[V2]'
-        nodes = VNFDeployNode  # '[V1,V3]'
-        nodes = str(nodes).replace("[", '').replace("]", '')  # 'V1,V3'
-        nodes = nodes.split(',')  # 如  ['V1', 'V3']
+        nodes = VNFDeployNode.strip('[]').split(',')  # ['V1', 'V3']
         tmp = [val for val in nodes if val in fail_server_vm]  # 交集
         if len(tmp) > 0:  # 有交集
             VNF_list.append(VNFID)
+    # 获取故障VNF对应的app
+    dict_VNF_app = {}  # {'VNF1': ['App2', 'App3'], 'VNF2': ['App1']}
+    app_index_list = app_df.index.tolist()  # 所有app索引  ['App1', 'App2', 'App3']
+    for VNF_i in VNF_list:  # ['VNF1', 'VNF2']
+        App = []
+        for app_i in app_index_list:
+            ApplicationVNFs = app_df.loc[app_i, 'ApplicationVNFs'].strip('[]').split(
+                ',')  # ['D1', 'VNF1', 'D1']
+            if VNF_i in ApplicationVNFs:
+                App.append(app_i)
+            else:
+                pass
+        dict_VNF_app[VNF_i] = App
 
     # 是否有空闲server进行迁移，分类考虑
-    server_list = G_T.graph['Node_info'][(G_T.graph['Node_info'].NodeIdle == 1) & (
-                 G_T.graph['Node_info'].NodeType == 'Server')].index.tolist()  # 空闲节点  ['S3']    node_info中，S1-S3为0，S4为1
-    # server_list = []
-    # server_list = ['S3']
+    server_list = node_df[(node_df.NodeIdle == 1) & (
+                 node_df.NodeType == 'Server')].index.tolist()  # 空闲节点  ['S3']
 
     if len(server_list) == 0:  # 若无空闲server
         # 按节点单独故障处理
@@ -307,10 +315,12 @@ def serverFail(G_T, FailNode, x):
         for vm_i in fail_server_vm:
             VMFail(G_T, vm_i, x)
     else:  # 有空闲server
+        # 迁移信息准备：迁移节点server、更改状态、迁移时间m、server的vm列表server_vm
         server = random.choice(server_list)  # 迁移后的server    如'S3'
+        node_df.loc[server, 'NodeIdle'] = 0  # 状态变为占用
+        node_df.loc[FailNode, 'NodeIdle'] = 1  # 状态变为空闲
         m = node_df.loc[FailNode, 'NodeFailMT']  # 迁移时间 h
-
-        # 寻找迁移后的server子vm节点  server_vm
+        # 获取server的vm列表server_vm
         server_vm = []  # server子vm节点列表  如['V5', 'V6']
         Edge_df = G_T.graph['Edge_info']
         Server_index = Edge_df[
@@ -326,143 +336,152 @@ def serverFail(G_T, FailNode, x):
             else:
                 pass
 
-        # 更新故障VNF的VNFDeployNode
-        # 故障server    vm节点列表fail_server_vm  如['V1', 'V2']
-        # 迁移后server  vm节点列表server_vm       如['V5', 'V6']
-        for i in range(len(VNF_list)):  # 故障VNF  如['VNF1', 'VNF2']
-            DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # 如 '[V1,V3]'
-            tmp1 = [val for val in fail_server_vm if val in DeployNode]  # 如 ['V1']
-            try:
-                update_DeployNode = DeployNode.replace(tmp1[0], server_vm[i])  # 如 ['V5', 'V3']
-            except:
-                pass
-            VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode  # 更新VNFDeployNode
-
-
-        # 获取故障VNF对应的app
-        dict_VNF_app = {}  # {'VNF1': ['App2', 'App3'], 'VNF2': ['App1']}
-        app_index_list = app_df.index.tolist()  # 所有app索引  ['App1', 'App2', 'App3']
-        for VNF_i in VNF_list:  # ['VNF1', 'VNF2']
-            App = []
-            for app_i in app_index_list:
-                ApplicationVNFs = app_df.loc[app_i, 'ApplicationVNFs'].strip('[]').split(',')  # ['D1', 'VNF1', 'D1']
-                if VNF_i in ApplicationVNFs:
-                    App.append(app_i)
-                else:
-                    pass
-            dict_VNF_app[VNF_i] = App
-
-        # 根据VNF部署节点 获取新工作路径path  更新业务工作路径
-        for VNF_i in VNF_list:  # ['VNF1']
-            DeployNode = VNF_df.loc[VNF_i, 'VNFDeployNode'].strip('[]').split(',')  # ['V5', 'V3']
-            path = []
-            for node_i in DeployNode:
-                path_i = shortestPath(G_T, node_i)
-                path.extend(path_i)
-            App_list = dict_VNF_app[VNF_i]  # ['App2', 'App3']
-            for App_i in App_list:
-                app_df.loc[App_i, 'ApplicationWorkPath'] = str(path)  # 更新App_i工作路径
-
-        # 　是否有主备型VNF　分类判断
-        # 　获取故障VNF的备类型
-        VNFBackupType = []
+        # 是否有主备型VNF　有则主备倒换
+        type = 0
+        Backup_ok = []     #备好的VNF列表
+        Backup_fail = []   #备断的VNF列表
         for VNF_i in VNF_list:
-            VNFBackupType.append(VNF_df.loc[VNF_i, 'VNFBackupType'])  # ['主备','2way']
-        # 　根据type值分类
-        type = 0  # 初始值
-        if '主备' in VNFBackupType:  # 有主备型
-            for VNF_i in VNF_list:
-                if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主备':
-                    s = re.findall("\d+", G_T.graph['VNF_info'].loc[VNF_i, 'VNFFailST'])  # 倒换时间  ['10']  单位s
-                    # print(float(s[0]))
-                    if len(list(set(VNF_df['VNFBackupNode'][VNF_i].strip('[]').split(',')).intersection(
-                            set(x['EvolFailNodesSet'])))) == 0:  # 备没断
-                        type = 1  # 有主备型 备没断      (若多个主备型，只要有一个备没断，type=1, 若备全断type=2)
-                    else:
-                        pass
-            if type == 0:  # 备断
-                type = 2  # 有主备型 备断
-        else:
-            type = 3  # 无主备型
-
-        if type == 1:  # 有主备型 备没断
-            for VNF_i in VNF_list:
-                if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主机':
-                    App_list = dict_VNF_app[VNF_i]  # ['App1']
-                    for App_i in App_list:
-                        # 业务中断时间为倒换+迁移时间
-                        app_df.loc[App_i, 'ApplicationDownTime'] += ((float(s[0]) / 3600) + m)
-                elif VNF_df.loc[VNF_i, 'VNFBackupType'] == '主备':
-                    # print(x['EvolFailNodesSet'])
-                    # print(VNF_df['VNFBackupNode'][VNF_i].strip('[]').split(','))
-
-                    # VNF倒换  更新主备节点　记录业务中断时间
+            if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主备':
+                s = re.findall("\d+", G_T.graph['VNF_info'].loc[VNF_i, 'VNFFailST'])  # 倒换时间  ['10']  单位s
+                if len(list(set(VNF_df['VNFBackupNode'][VNF_i].strip('[]').split(',')).intersection(
+                        set(x['EvolFailNodesSet'])))) == 0:  # 备没断
+                    Backup_ok.append(VNF_i)
+                    # VNF倒换  更新主备节点
                     deployNode = VNF_df.loc[VNF_i, 'VNFDeployNode']
                     backupNode = VNF_df.loc[VNF_i, 'VNFBackupNode']
                     VNF_df.at[VNF_i, 'VNFDeployNode'] = backupNode
                     VNF_df.at[VNF_i, 'VNFBackupNode'] = deployNode
-                    # 更新业务工作路径
-                    DeployNode = VNF_df.loc[VNF_i, 'VNFDeployNode'].strip('[]').split(',')  # ['V4']
-                    path = []
-                    for node_i in DeployNode:
+                else:
+                    Backup_fail.append(VNF_i)
+            else:
+                pass
+        # 分类讨论
+        if len(Backup_ok) > 0:  # vnf存在备好
+            type = 1
+        elif len(Backup_ok) == 0 and len(Backup_ok) > 0:  # 所有vnf备断
+            type = 2
+        else:  # 无主备
+            type = 3
+
+        # 迁移, 更新故障VNF的VNFDeployNode 或 BackupNode
+        for i in range(len(VNF_list)):  # 故障server的VNF  i如 0 1 2 3
+            if VNF_df.loc[VNF_list[i], 'VNFBackupType'] == '主备':
+                if VNF_list[i] in Backup_ok:  # 备好的vnf  迁移的是其备节点
+                    BackupNode = VNF_df.loc[VNF_list[i], 'VNFBackupNode']     # '[V1]'
+                    node = VNF_df.loc[VNF_list[i], 'VNFBackupNode'].strip('[]').split(',')   #  ['V1']
+                    update_BackupNode = BackupNode.replace(node[0], server_vm[i])   # '[V7]'     # 前换成后   输入、结果都为str格式
+                    VNF_df.loc[VNF_list[i], 'BackupNode'] = update_BackupNode
+                else:   # 备断的vnf  迁移的是部署节点
+                    DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']     # '[V1]'
+                    node = VNF_df.loc[VNF_list[i], 'VNFDeployNode'].strip('[]').split(',')   #  ['V1']
+                    update_DeployNode = DeployNode.replace(node[0], server_vm[i])   # '[V7]'     # 前换成后   输入、结果都为str格式
+                    VNF_df.loc[VNF_list[i], 'DeployNode'] = update_DeployNode
+            elif VNF_df.loc[VNF_list[i], 'VNFBackupType'] == '主机':
+                DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # '[V1]'
+                node = VNF_df.loc[VNF_list[i], 'VNFDeployNode'].strip('[]').split(',')  # ['V1']
+                update_DeployNode = DeployNode.replace(node[0], server_vm[i])  # '[V7]'     # 前换成后   输入、结果都为str格式
+                VNF_df.loc[VNF_list[i], 'DeployNode'] = update_DeployNode
+            else:  # 2way
+                DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # 如 '[V1,V3]'
+                node = VNF_df.loc[VNF_list[i], 'VNFDeployNode'].strip('[]').split(',')  # ['V1','V3']
+                tmp1 = [val for val in fail_server_vm if val in node]  # 如 ['V1']
+                update_DeployNode = DeployNode.replace(tmp1[0], server_vm[i])  # 如'[V7,V3]'
+                VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode
+
+        # 根据VNF部署节点 获取新工作路径path  更新业务工作路径
+        for VNF_i in VNF_list:  # ['VNF1']
+            App_list = dict_VNF_app[VNF_i]  # ['App2', 'App3']
+            for App_i in App_list:
+                # 获取故障业务的vnf列表  vnfs
+                vnfs = []
+                ApplicationVNFs = app_df.loc[App_i, 'ApplicationVNFs'].strip('[]').split(',')  # ['D1', 'VNF1','VNF2','VNF3', 'D1']
+                h = len(ApplicationVNFs)
+                for i in range(1,h-1):
+                    vnfs.append(ApplicationVNFs[i])
+                # 对业务的每个vnf寻找路径
+                path = []
+                for VNF_i in vnfs:
+                    DeployNode = VNF_df.loc[VNF_i, 'VNFDeployNode'].strip('[]').split(',')  # ['V5', 'V3']
+                    for node_i in DeployNode:  # 考虑2way有2个部署节点
                         path_i = shortestPath(G_T, node_i)
                         path.extend(path_i)
-                    App_list = dict_VNF_app[VNF_i]  # ['App1']
-                    for App_i in App_list:
-                        app_df.loc[App_i, 'ApplicationWorkPath'] = str(path)  # 更新App_i工作路径
-                        # 业务中断时间为倒换时间
-                        app_df.loc[App_i, 'ApplicationDownTime'] += (float(s[0]) / 3600)
-                else:  # 2way
-                    if len(list(set(VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')).intersection(
-                            set(x['EvolFailNodesSet'])))) > 0:  # 交集不为空，0 way
-                        App_list = dict_VNF_app[VNF_i]  # ['App1']
-                        for App_i in App_list:
-                            # 业务中断时间为倒换+迁移时间
-                            app_df.loc[App_i, 'ApplicationDownTime'] += ((float(s[0]) / 3600) + m)
-                    else:  # 1way
-                        pass
+                app_df.loc[App_i, 'ApplicationWorkPath'] = str(path)  # 更新App_i工作路径
 
-        elif type == 2:  # 有主备型 备断
+        # 记录VNF中断时间
+        dict_vnf_dowmtime = {}
+        if type == 1:  # 有主备型 存在备好的vnf
             for VNF_i in VNF_list:
                 if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主机':
-                    App_list = dict_VNF_app[VNF_i]  # ['App1']
-                    for App_i in App_list:
-                        # 业务中断时间为迁移时间
-                        app_df.loc[App_i, 'ApplicationDownTime'] += m
+                    dict_vnf_dowmtime[VNF_i] = ((float(s[0]) / 3600) + m) # VNF中断时间为倒换+迁移时间
                 elif VNF_df.loc[VNF_i, 'VNFBackupType'] == '主备':
-                    App_list = dict_VNF_app[VNF_i]  # ['App1']
-                    for App_i in App_list:
-                        # 业务中断时间为倒换时间
-                        app_df.loc[App_i, 'ApplicationDownTime'] += m
+                    if VNF_i in Backup_ok:  # 备好
+                        dict_vnf_dowmtime[VNF_i] = (float(s[0]) / 3600)  # VNF中断时间为倒换时间
+                    else:  # 备断
+                        dict_vnf_dowmtime[VNF_i] = ((float(s[0]) / 3600) + m)  # VNF中断时间为倒换+迁移时间
                 else:  # 2way
-                    if len(list(set(VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')).intersection(
-                            set(x['EvolFailNodesSet'])))) > 0:  # 交集不为空，0 way
-                        App_list = dict_VNF_app[VNF_i]  # ['App1']
-                        for App_i in App_list:
-                            # 业务中断时间为倒换+迁移时间
-                            app_df.loc[App_i, 'ApplicationDownTime'] += m
-                    else:  # 1way
-                        pass
+                    VNF_node = VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')    # ['V1','V3']
+                    for node in VNF_node:
+                        if node not in fail_server_vm:    # 找到另一个节点
+                            if node in x['EvolFailNodesSet']:  # 0 way
+                                dict_vnf_dowmtime[VNF_i] = ((float(s[0]) / 3600) + m)  # VNF中断时间为倒换+迁移时间
+                            else:  # 1 way
+                                pass
+                        else:
+                            pass
+
+        elif type == 2:  # 主备型 全部备断
+            for VNF_i in VNF_list:
+                if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主机':
+                    dict_vnf_dowmtime[VNF_i] = m   # VNF中断时间为迁移时间
+                elif VNF_df.loc[VNF_i, 'VNFBackupType'] == '主备':
+                    dict_vnf_dowmtime[VNF_i] = m  # VNF中断时间为迁移时间
+                else:  # 2way
+                    VNF_node = VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')    # ['V1','V3']
+                    for node in VNF_node:
+                        if node not in fail_server_vm:    # 找到另一个节点
+                            if node in x['EvolFailNodesSet']:  # 0 way
+                                dict_vnf_dowmtime[VNF_i] = m   #  VNF中断时间为迁移时间
+                            else:  # 1 way
+                                pass
+                        else:
+                            pass
 
         elif type == 3:  # 无主备型
             for VNF_i in VNF_list:
-                try:
                         if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主机':
-                            App_list = dict_VNF_app[VNF_i]  # ['App1']
-                            for App_i in App_list:
-                                # 业务中断时间为迁移时间
-                                app_df.loc[App_i, 'ApplicationDownTime'] += m
+                            dict_vnf_dowmtime[VNF_i] = m    # VNF中断时间为迁移时间
                         else:  # 2way
-                            if len(list(set(VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')).intersection(
-                                    set(x['EvolFailNodesSet'])))) > 0:  # 交集不为空，0 way
-                                App_list = dict_VNF_app[VNF_i]  # ['App1']
-                                for App_i in App_list:
-                                    # 业务中断时间为倒换+迁移时间
-                                    app_df.loc[App_i, 'ApplicationDownTime'] += m
-                            else:  # 1way
-                                pass
-                except:
+                            VNF_node = VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')  # ['V1','V3']
+                            for node in VNF_node:
+                                if node not in fail_server_vm:  # 找到另一个节点
+                                    if node in x['EvolFailNodesSet']:  # 0 way
+                                        dict_vnf_dowmtime[VNF_i] = m    # VNF中断时间为迁移时间
+                                    else:  # 1 way
+                                        pass
+                                else:
+                                    pass
+        # 更新业务中断时间
+        for appID, ApplicationVNFs in app_df['ApplicationVNFs'].items():
+            # 获取故障业务的vnf列表  vnfs
+            vnfs = []
+            ApplicationVNFs = ApplicationVNFs.strip('[]').split(',')  # ['D1', 'VNF1','VNF2','VNF3', 'D1']
+            h = len(ApplicationVNFs)
+            for i in range(1, h - 1):
+                vnfs.append(ApplicationVNFs[i])    #[ 'VNF1','VNF2','VNF3']
+            # 取VNF中断时间最大值
+            downtime = []
+            for vnf_i in vnfs:
+                if vnf_i in dict_vnf_dowmtime.keys():
+                    downtime.append(dict_vnf_dowmtime[vnf_i])
+                else:  # 若vnf没有中断时间
                     pass
+            if len(downtime) == 0:  # 若业务的vnf没有中断
+                pass
+            else:
+                time = max(downtime)
+                app_df.loc[appID, 'ApplicationDownTime'] += time  # 更新业务中断时间
+    a = 1
+
 
 
 def RecoNodes(G_T, appID, x):
@@ -516,8 +535,8 @@ def testRulAna(gName, evolName):
     return appAvaData
 
 if __name__ == '__main__':
-    g = CloudVritualizedNetwork(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx')
-    fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep + 'RulAnaTestFile/evol3.xlsx'
+    g = CloudVritualizedNetwork(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file_128server.xlsx')
+    fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep + 'RulAnaTestFile/evol_zjm.xlsx'
     g_t = net_evo_rul_ana_test(g, fname)
     g.displayApp()
     printLog()
