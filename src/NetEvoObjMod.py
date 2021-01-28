@@ -149,6 +149,8 @@ class CloudVritualizedNetwork(nx.Graph):
         self.graph['Edge_info'] = self.update_edges_data()
         self.update_app_work_path()
         
+        print('演化对象模型已经建立')
+        
     def update_nodes_data(self):
         df = pd.DataFrame(columns=['NodeType','NodeFailType',
                                    'NodeFailDistri','NodeFailMTBF',
@@ -187,8 +189,8 @@ class CloudVritualizedNetwork(nx.Graph):
         VNF_info = self.graph['VNF_info']
         def find_work_path(x,VNF_info):
             logic_path = x['ApplicationVNFs']
-            print('logic_path', logic_path)
-            print('lp type', type(logic_path))
+            # print('logic_path', logic_path)
+            # print('lp type', type(logic_path))
             logic_path = str(logic_path)
             try:
                 logic_path = logic_path.strip('[]').split(',')
@@ -222,7 +224,7 @@ def test():
     file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx'
     g = CloudVritualizedNetwork(file)
     # nx.write_gpickle(g,'g.gpickle')
-    g.displayApp()
+    # g.displayApp()
     return g
 
 if __name__ == '__main__':

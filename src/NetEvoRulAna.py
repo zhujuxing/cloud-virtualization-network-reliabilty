@@ -28,7 +28,7 @@ sheetNum = 0
 def net_evo_rul_ana_test(g, fname):
 
     G_T = g
-    g.displayApp()
+    # g.displayApp()
 
 
     if type(fname) == str:
@@ -40,6 +40,10 @@ def net_evo_rul_ana_test(g, fname):
         evol = fname
 
     def rul_ana(x):
+        '''
+        每条演化规则的分析函数
+        '''
+        
         #print(x['EvolTime'], 'Fail: ', x['EvolFailNodesSet'], 'Reco：', x['EvolRecoNodesSet'], '\n')
         for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
             if status == 1:
@@ -70,6 +74,7 @@ def net_evo_rul_ana_test(g, fname):
 
                 if Nodetype == 'V':#故障节点为VM
                     VMFail(G_T, FailNode, x)
+        print('已经完成%s时刻的网络演化'%x['EvolTime'])
 
     evol.apply(rul_ana,axis=1)
     # print(Uptime)
@@ -379,13 +384,19 @@ def serverFail(G_T, FailNode, x):
             elif VNF_df.loc[VNF_list[i], 'VNFBackupType'] == '主机':
                 DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # '[V1]'
                 node = VNF_df.loc[VNF_list[i], 'VNFDeployNode'].strip('[]').split(',')  # ['V1']
-                update_DeployNode = DeployNode.replace(node[0], server_vm[i])  # '[V7]'     # 前换成后   输入、结果都为str格式
+                try: 
+                    update_DeployNode = DeployNode.replace(node[0], server_vm[i])  # '[V7]'     # 前换成后   输入、结果都为str格式
+                except:
+                    pass
                 VNF_df.loc[VNF_list[i], 'DeployNode'] = update_DeployNode
             else:  # 2way
                 DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # 如 '[V1,V3]'
                 node = VNF_df.loc[VNF_list[i], 'VNFDeployNode'].strip('[]').split(',')  # ['V1','V3']
                 tmp1 = [val for val in fail_server_vm if val in node]  # 如 ['V1']
-                update_DeployNode = DeployNode.replace(tmp1[0], server_vm[i])  # 如'[V7,V3]'
+                try:
+                    update_DeployNode = DeployNode.replace(tmp1[0], server_vm[i])  # 如'[V7,V3]'
+                except:
+                    pass
                 VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode
 
         # 根据VNF部署节点 获取新工作路径path  更新业务工作路径
@@ -538,8 +549,8 @@ if __name__ == '__main__':
     g = CloudVritualizedNetwork(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file_128server.xlsx')
     fname = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep + 'RulAnaTestFile/evol_zjm.xlsx'
     g_t = net_evo_rul_ana_test(g, fname)
-    g.displayApp()
-    printLog()
+    # g.displayApp()
+    # printLog()
 
 
 

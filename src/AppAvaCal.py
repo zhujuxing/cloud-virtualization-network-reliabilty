@@ -47,7 +47,7 @@ def app_ava_cal(file,T,N):
         evol = NetEvoConGen.net_evo_con_gen(g_T, T)
         g_T= NetEvoRulAna.net_evo_rul_ana_test(g_T,evol) # 修改net_evo_rul_ana_test为正式版函数名
         single_app_avail[i+1] = g_T.graph['Application_info']['ApplicationDownTime'].apply(lambda x:1-(x/(T*365*24)))
-        g_T.displayApp()
+        # g_T.displayApp()
         # NetEvoRulAna.saveLog()
     NetEvoRulAna.clearVar()
 
@@ -68,7 +68,7 @@ def test_T():
     file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")\
            +os.sep+'test'+os.sep+"file_128server.xlsx"
     result = pd.DataFrame()
-    for T in [10,20,50,100,200]:
+    for T in [100]:
         t1 = time.time()
         single_app_avail, whole_app_avail = app_ava_cal(file, T, N)
         t2 = time.time()
@@ -95,4 +95,4 @@ def test_N():
 
 if __name__ == '__main__':
     result_T = test_T()
-    result_N = test_N()
+    # result_N = test_N()
