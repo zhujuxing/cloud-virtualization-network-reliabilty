@@ -50,7 +50,8 @@ class CloudVritualizedNetwork(nx.Graph):
         nx.Graph.__init__(self)
         self.add_nodes_from(node_info['节点名称'])
         node_attr = {node_info.loc[i,'节点名称']:
-                     {'NodeType':node_info.loc[i,'节点类型']} for i in node_info.index}
+                     {'NodeType':node_info.loc[i,'节点类型'],
+                      'NodeVNF':node_info.loc[i,'节点上部署的服务']} for i in node_info.index}
         
         fail_info=fail_info.rename(columns={'节点类型':'NodeType',
                                             '节点故障模式':'NodeFailType',
