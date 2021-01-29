@@ -49,6 +49,7 @@ def app_ava_cal(file,T,N):
         single_app_avail[i+1] = g_T.graph['Application_info']['ApplicationDownTime'].apply(lambda x:1-(x/(T*365*24)))
         # g_T.displayApp()
         # NetEvoRulAna.saveLog()
+        del g_T
     NetEvoRulAna.clearVar()
 
     single_app_avail['result'] = single_app_avail.apply(np.mean, axis=1)
@@ -63,36 +64,43 @@ def app_ava_cal(file,T,N):
     
 
 def test_T():
-    N = 10
+    N = 100
     # file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx'
     file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")\
            +os.sep+'test'+os.sep+"file_128server.xlsx"
     result = pd.DataFrame()
-    for T in [100]:
+    for T in [10,20,50,100,200]:
         t1 = time.time()
         single_app_avail, whole_app_avail = app_ava_cal(file, T, N)
+        single_app_avail.to_excel('128server_result_(N100T%d).xlsx'%T)
         t2 = time.time()
         result_i = single_app_avail['result']
         result_i['whole'] = whole_app_avail
         result_i['time'] = t2-t1
         result[T] = result_i
+        result.to_excel('T.xlsx')
     # print("总用时：",round(t2-t1, 3),"秒")
     return result
 
 def test_N():
     T = 200
-    file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx'
+    # file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx'
+    file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")\
+       +os.sep+'test'+os.sep+"file_128server.xlsx"
     result = pd.DataFrame()
     for N in [10,50,100,200,500]:
         t1 = time.time()
         single_app_avail, whole_app_avail = app_ava_cal(file, T, N)
+        single_app_avail.to_excel('128server_result_(T200N%d).xlsx'%N)
         t2 = time.time()
         result_i = single_app_avail['result']
         result_i['whole'] = whole_app_avail
         result_i['time'] = t2-t1
         result[N] = result_i
+        result.to_excel("N.xlsx")
     return result
 
+
 if __name__ == '__main__':
-    result_T = test_T()
-    # result_N = test_N()
+    # result_T = test_T()
+    result_N = test_N()

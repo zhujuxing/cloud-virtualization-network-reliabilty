@@ -394,8 +394,7 @@ def serverFail(G_T, FailNode, x):
                     else:  # 备断的vnf  迁移的是部署节点
                         DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # '[V1]'
                         node = VNF_df.loc[VNF_list[i], 'VNFDeployNode'].strip('[]').split(',')  # ['V1']
-                        update_DeployNode = DeployNode.replace(node[0],
-                                                               server_vm[i])  # '[V7]'     # 前换成后   输入、结果都为str格式
+                        update_DeployNode = DeployNode.replace(node[0], server_vm[i])  # '[V7]'     # 前换成后   输入、结果都为str格式
                         VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode
                 elif VNF_df.loc[VNF_list[i], 'VNFBackupType'] == '主机':
                     DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # '[V1]'
@@ -406,11 +405,14 @@ def serverFail(G_T, FailNode, x):
                     DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # 如 '[V1,V3]'
                     node = VNF_df.loc[VNF_list[i], 'VNFDeployNode'].strip('[]').split(',')  # ['V1','V3']
                     tmp1 = [val for val in fail_server_vm if val in node]  # 如 ['V1']
-                    update_DeployNode = DeployNode.replace(tmp1[0], server_vm[i])  # 如'[V7,V3]'
+                    try:
+                        update_DeployNode = DeployNode.replace(tmp1[0], server_vm[i])  # 如'[V7,V3]'
+                    except:
+                        pass
                     VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode
 
             # 根据VNF部署节点 获取新工作路径path  更新业务工作路径
-            for VNF_i in VNF_list:  # ['VNF1']
+            for VNF_i in VNF_list:  # ['VNF1'] 
                 App_list = dict_VNF_app[VNF_i]  # ['App2', 'App3']
                 for App_i in App_list:
                     # 获取故障业务的vnf列表  vnfs
@@ -502,10 +504,6 @@ def serverFail(G_T, FailNode, x):
                 else:
                     time = max(downtime)
                     app_df.loc[appID, 'ApplicationDownTime'] += time  # 更新业务中断时间
-
-
-
-
 
 
 
