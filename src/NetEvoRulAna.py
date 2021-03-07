@@ -28,7 +28,7 @@ sheetNum = 0
 def net_evo_rul_ana_test(g, fname):
 
     G_T = g
-    g.displayApp()
+    # g.displayApp()
 
 
     if type(fname) == str:
@@ -40,6 +40,7 @@ def net_evo_rul_ana_test(g, fname):
         evol = fname
 
     def rul_ana(x):
+        print("时间为%s的网络演化已经执行"%x['EvolTime'])
         #print(x['EvolTime'], 'Fail: ', x['EvolFailNodesSet'], 'Reco：', x['EvolRecoNodesSet'], '\n')
         for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
             if status == 1:

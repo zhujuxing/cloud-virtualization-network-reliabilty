@@ -86,7 +86,7 @@ def test_N():
     T = 200
     # file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx'
     file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")\
-       +os.sep+'test'+os.sep+"file_128server.xlsx"
+       +os.sep+'test'+os.sep+"file_128server - 副本.xlsx"
     result = pd.DataFrame()
     for N in [10,50,100,200,500]:
         t1 = time.time()
