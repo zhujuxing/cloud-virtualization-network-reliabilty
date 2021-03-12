@@ -18,6 +18,7 @@ import os
 import openpyxl
 import collections
 from openpyxl import load_workbook
+from NetEvoConGen import convert
 import random
 
 # TODO: shortestPath 函数中都是从D1寻找至新VNF的路径，考虑后续是否要通过其它DCGW走
@@ -33,14 +34,21 @@ sheetNum = 0 # 全局变量，表示
 def net_evo_rul_ana(g, fname):
     G_T = g
     # g.displayApp()
-
+    evol = pd.DataFrame(columns=['EvolTime','EvolFailNodesSet','EvolRecoNodesSet'])
     if type(fname) == str:
-        evol = pd.read_excel(fname)
-        evol['EvolTime'] = evol['EvolTime'].apply(eval)
-        evol['EvolFailNodesSet'] = evol['EvolFailNodesSet'].apply(eval)
-        evol['EvolRecoNodesSet'] = evol['EvolRecoNodesSet'].apply(eval)
+        try:
+            evol = pd.read_excel(fname)
+            evol['EvolTime'] = evol['EvolTime'].apply(eval)
+            evol['EvolFailNodesSet'] = evol['EvolFailNodesSet'].apply(eval)
+            evol['EvolRecoNodesSet'] = evol['EvolRecoNodesSet'].apply(eval)
+        except Exception:
+            print('输入文件有错，请检查输入文件格式。')
     elif type(fname) == pd.DataFrame:
         evol = fname
+    else:
+        raise Exception("请给出正确的演化条件文件或数据输入。")
+
+
 
     def rul_ana(x):
         print("时间为%s的网络演化已经执行" % x['EvolTime'])
@@ -74,7 +82,12 @@ def net_evo_rul_ana(g, fname):
                 if Nodetype == 'V':  # 故障节点为VM
                     print("***VM节点%s故障" % FailNode)
                     VMFail(G_T, FailNode, x)
-    evol.apply(rul_ana, axis=1)
+
+    # evol.apply(rul_ana, axis=1)
+    for evol_eachtime in evol.iterrows():
+        x = evol_eachtime[1]
+        rul_ana(x)
+
     Uptime.clear()
     Downtime.clear()
 
@@ -242,6 +255,8 @@ def VMFail(G_T, FailNode, x):
                                 # 将倒换时间加到业务不可用时间上
                                 s = re.findall("\d+", G_T.graph['VNF_info'].loc[VNFID, 'VNFFailST'])
                                 G_T.graph['Application_info'].loc[appID, 'ApplicationDownTime'] += (float(s[0]) / 3600)
+
+
                                 # 更改业务工作路径
                                 a = G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupNode'].replace("[", '').replace("]",
                                                                                                                '').join(
@@ -249,6 +264,7 @@ def VMFail(G_T, FailNode, x):
                                 b = G_T.graph['VNF_info'].loc[VNFID, 'VNFDeployNode'].replace("[", '').replace("]",
                                                                                                                '').join(
                                     '\'\'')
+                                print('---节点%s倒换到节点%s' % (a,b))
                                 # print('backup node:', a, 'deploy node:', b)
                                 newPath = shortestPath(G_T, b)
 
@@ -283,7 +299,6 @@ def VMFail(G_T, FailNode, x):
 
 
 def serverFail(G_T, FailNode, x):
-
     VNF_df = G_T.graph['VNF_info']
     app_df = G_T.graph['Application_info']
     edge_df = G_T.graph['Edge_info']
@@ -346,7 +361,9 @@ def serverFail(G_T, FailNode, x):
             node_df.loc[server, 'NodeIdle'] = 0  # 状态变为占用
             # print('FailNode状态置1', FailNode)
             node_df.loc[FailNode, 'NodeIdle'] = 1  # 状态变为空闲
-            m = node_df.loc[FailNode, 'NodeFailMT']  # 迁移时间 h
+            migration_time = node_df.loc[FailNode, 'NodeFailMT']  # 迁移时间 h
+
+
             # 获取server的vm列表server_vm
             server_vm = []  # server子vm节点列表  如['V5', 'V6']
             Edge_df = G_T.graph['Edge_info']
@@ -362,16 +379,13 @@ def serverFail(G_T, FailNode, x):
                     server_vm.append(node_i)
                 else:
                     pass
-            # print('server', server)
-            # print('server_vm', server_vm)
-            # 是否有主备型VNF　有则主备倒换
 
-            type = 0
+
             Backup_ok: List[Any] = []  # 备好的VNF列表
             Backup_fail = []  # 备断的VNF列表
             for VNF_i in VNF_list:
                 if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主备':
-                    s = re.findall("\d+", G_T.graph['VNF_info'].loc[VNF_i, 'VNFFailST'])  # 倒换时间  ['10']  单位s
+                    switch_time = convert( G_T.graph['VNF_info'].loc[VNF_i, 'VNFFailST'])  # 倒换时间  ['10']  单位s
                     if len(list(set(VNF_df['VNFBackupNode'][VNF_i].strip('[]').split(',')).intersection(
                             set(x['EvolFailNodesSet'])))) == 0:  # 备没断
                         Backup_ok.append(VNF_i)
@@ -394,7 +408,16 @@ def serverFail(G_T, FailNode, x):
 
             # 迁移, 更新故障VNF的VNFDeployNode 或 BackupNode
             for i in range(len(VNF_list)):  # 故障server的VNF  i如 0 1 2 3
-                if VNF_df.loc[VNF_list[i], 'VNFBackupType'] == '主备':
+                if VNF_df.loc[VNF_list[i], 'VNFBackupType'] == '主机':
+                    DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # '[V1]'
+                    node = DeployNode.strip('[]')  # ['V1']
+                    update_DeployNode = DeployNode.replace(node, server_vm[i])  # '[V7]'     # 前换成后   输入、结果都为str格式
+                    print('---节点%s倒换到节点%s' % (node, server_vm[i]))
+
+                    VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode
+                    print('---节点%s迁移到节点%s' % (node, update_DeployNode))
+
+                elif VNF_df.loc[VNF_list[i], 'VNFBackupType'] == '主备':
                     if VNF_list[i] in Backup_ok:  # 备好的vnf  迁移的是其备节点
                         BackupNode = VNF_df.loc[VNF_list[i], 'VNFBackupNode']  # '[V1]'
                         node = BackupNode.strip('[]') # ['V1']
@@ -411,26 +434,19 @@ def serverFail(G_T, FailNode, x):
 
                         VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode
                         print('---节点%s迁移到节点%s' % (node, update_DeployNode))
-                elif VNF_df.loc[VNF_list[i], 'VNFBackupType'] == '主机':
-                    DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # '[V1]'
-                    node = DeployNode.strip('[]')  # ['V1']
-                    update_DeployNode = DeployNode.replace(node, server_vm[i])  # '[V7]'     # 前换成后   输入、结果都为str格式
-                    print('---节点%s倒换到节点%s'%(node,server_vm[i]))
 
-                    VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode
-                    print('---节点%s迁移到节点%s' % (node, update_DeployNode))
-                else:  # 2way
+                else:  # N way
                     DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # 如 '[V1,V3]'
                     node = VNF_df.loc[VNF_list[i], 'VNFDeployNode'].strip('[]').split(',')  # ['V1','V3']
                     tmp1 = [val for val in fail_server_vm if val in node]  # 如 ['V1']
                     update_DeployNode = DeployNode.replace(tmp1[0], server_vm[i])  # 如'[V7,V3]'
-                    print('---节点%s倒换到节点%s'%(node,server_vm[i]))
+                    print('---节点%s倒换到节点%s'%(tmp1[0],server_vm[i]))
 
                     VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode
-                    print('---节点%s迁移到节点%s' % (node, update_DeployNode))
+                    print('---节点%s迁移到节点%s' % (tmp1[0], update_DeployNode))
 
             # 根据VNF部署节点 获取新工作路径path  更新业务工作路径
-            for VNF_i in VNF_list:  # ['VNF1'] 
+            for VNF_i in VNF_list:  # ['VNF1']
                 App_list = dict_VNF_app[VNF_i]  # ['App2', 'App3']
                 for App_i in App_list:
                     # 获取故障业务的vnf列表  vnfs
@@ -454,18 +470,18 @@ def serverFail(G_T, FailNode, x):
             if type == 1:  # 有主备型 存在备好的vnf
                 for VNF_i in VNF_list:
                     if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主机':
-                        dict_vnf_dowmtime[VNF_i] = ((float(s[0]) / 3600) + m)  # VNF中断时间为倒换+迁移时间
+                        dict_vnf_dowmtime[VNF_i] = (switch_time + migration_time)  # VNF中断时间为倒换+迁移时间
                     elif VNF_df.loc[VNF_i, 'VNFBackupType'] == '主备':
                         if VNF_i in Backup_ok:  # 备好
-                            dict_vnf_dowmtime[VNF_i] = (float(s[0]) / 3600)  # VNF中断时间为倒换时间
+                            dict_vnf_dowmtime[VNF_i] = switch_time # VNF中断时间为倒换时间
                         else:  # 备断
-                            dict_vnf_dowmtime[VNF_i] = ((float(s[0]) / 3600) + m)  # VNF中断时间为倒换+迁移时间
+                            dict_vnf_dowmtime[VNF_i] = (switch_time+ migration_time)  # VNF中断时间为倒换+迁移时间
                     else:  # 2way
                         VNF_node = VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')  # ['V1','V3']
                         for node in VNF_node:
                             if node not in fail_server_vm:  # 找到另一个节点
                                 if node in x['EvolFailNodesSet']:  # 0 way
-                                    dict_vnf_dowmtime[VNF_i] = ((float(s[0]) / 3600) + m)  # VNF中断时间为倒换+迁移时间
+                                    dict_vnf_dowmtime[VNF_i] = (switch_time+ migration_time)  # VNF中断时间为倒换+迁移时间
                                 else:  # 1 way
                                     pass
                             else:
@@ -474,15 +490,15 @@ def serverFail(G_T, FailNode, x):
             elif type == 2:  # 主备型 全部备断
                 for VNF_i in VNF_list:
                     if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主机':
-                        dict_vnf_dowmtime[VNF_i] = m  # VNF中断时间为迁移时间
+                        dict_vnf_dowmtime[VNF_i] = migration_time  # VNF中断时间为迁移时间
                     elif VNF_df.loc[VNF_i, 'VNFBackupType'] == '主备':
-                        dict_vnf_dowmtime[VNF_i] = m  # VNF中断时间为迁移时间
+                        dict_vnf_dowmtime[VNF_i] = migration_time  # VNF中断时间为迁移时间
                     else:  # 2way
                         VNF_node = VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')  # ['V1','V3']
                         for node in VNF_node:
                             if node not in fail_server_vm:  # 找到另一个节点
                                 if node in x['EvolFailNodesSet']:  # 0 way
-                                    dict_vnf_dowmtime[VNF_i] = m  # VNF中断时间为迁移时间
+                                    dict_vnf_dowmtime[VNF_i] = migration_time  # VNF中断时间为迁移时间
                                 else:  # 1 way
                                     pass
                             else:
@@ -491,13 +507,13 @@ def serverFail(G_T, FailNode, x):
             elif type == 3:  # 无主备型
                 for VNF_i in VNF_list:
                     if VNF_df.loc[VNF_i, 'VNFBackupType'] == '主机':
-                        dict_vnf_dowmtime[VNF_i] = m  # VNF中断时间为迁移时间
+                        dict_vnf_dowmtime[VNF_i] = migration_time  # VNF中断时间为迁移时间
                     else:  # 2way
                         VNF_node = VNF_df['VNFDeployNode'][VNF_i].strip('[]').split(',')  # ['V1','V3']
                         for node in VNF_node:
                             if node not in fail_server_vm:  # 找到另一个节点
                                 if node in x['EvolFailNodesSet']:  # 0 way
-                                    dict_vnf_dowmtime[VNF_i] = m  # VNF中断时间为迁移时间
+                                    dict_vnf_dowmtime[VNF_i] = migration_time  # VNF中断时间为迁移时间
                                 else:  # 1 way
                                     pass
                             else:
@@ -581,11 +597,16 @@ def testRulAna(gName, evolName):
 
 
 if __name__ == '__main__':
+    # g = CloudVritualizedNetwork(os.path.abspath(
+    #     os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'file_128server.xlsx')
     g = CloudVritualizedNetwork(os.path.abspath(
-        os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'file_128server.xlsx')
+        os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'file.xlsx')
     fname = os.path.abspath(
         os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'RulAnaTestFile/evol_zjm.xlsx'
     g_t = net_evo_rul_ana(g, fname)
     # g.displayApp()
     printLog()
     saveLog()
+
+
+    
