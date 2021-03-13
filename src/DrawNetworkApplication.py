@@ -74,19 +74,19 @@ fig = plt.figure(figsize=(40, 10))
 plt.rcParams['font.sans-serif'] = ["SimHei"]
 plt.rcParams['axes.unicode_minus'] = False
 ax1 = fig.add_subplot(2, 1, 1)
-nx.draw_networkx(network, pos=pos, with_labels=False, node_size=3, node_color='blue')
-for key in node_color_dict.keys():
-    if node_num_dict[key] != 0:
-        node_list = [(node_name_dict(key)+str(i+1)) for i in range(node_num_dict(key))]
-        nx.draw_networkx_nodes(network, pos=pos, nodelist=node_list,
-                               node_size=20, node_shape=node_shape_dict[key], node_color=node_color_dict[key])
-VM_idle = nodes_info1[nodes_info1['VNF'] == 'none']['NodeID'].to_list()
-nx.draw_networkx_nodes(g, pos=pos, nodelist=VM_idle,
-                       node_size=20, node_shape='o', node_color='white')
-server_idle = nodes_info1[nodes_info1['Idle'] == 1]['NodeID'].to_list()
-nx.draw_networkx_nodes(g, pos=pos, nodelist=server_idle,
-                       node_size=20, node_shape='o', node_color='white')
-ax1.set_title('NFVnet')
+# nx.draw_networkx(network, pos=pos, with_labels=False, node_size=3, node_color='blue')
+# for key in node_color_dict.keys():
+#     if node_num_dict[key] != 0:
+#         node_list = [(node_name_dict(key)+str(i+1)) for i in range(node_num_dict(key))]
+#         nx.draw_networkx_nodes(network, pos=pos, nodelist=node_list,
+#                                node_size=20, node_shape=node_shape_dict[key], node_color=node_color_dict[key])
+# VM_idle = nodes_info1[nodes_info1['VNF'] == 'none']['NodeID'].to_list()
+# nx.draw_networkx_nodes(g, pos=pos, nodelist=VM_idle,
+#                        node_size=20, node_shape='o', node_color='white')
+# server_idle = nodes_info1[nodes_info1['Idle'] == 1]['NodeID'].to_list()
+# nx.draw_networkx_nodes(g, pos=pos, nodelist=server_idle,
+#                        node_size=20, node_shape='o', node_color='white')
+# ax1.set_title('NFVnet')
 
 ax2 = fig.add_subplot(2, 1, 2)
 # color_list = ['k', 'r', 'tan', 'y', 'g', 'c', 'skyblue', 'b', 'm', 'pink']
