@@ -126,9 +126,7 @@ def printLog():
 
     Uplist.clear()
     Downlist.clear()
-    # upDF.iloc[0:0]
-    # downDF.iloc[0:0]
-    # appDownTimeDF.iloc[0:0]
+
 
 
 def saveLog():
@@ -157,7 +155,7 @@ def saveLog():
     time_now_milsec = int(round(time_now-int(time_now),3) * 1000)
 
     fileName = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")\
-        +os.sep+"src"+os.sep+("AppDownTimeLog%s.xlsx" % (time_now_date + str(time_now_milsec)+"mils"))
+        +os.sep+"log"+os.sep+("AppDownTimeLog%s.xlsx" % (time_now_date + str(time_now_milsec)+"mils"))
     appDownTimeDF.to_excel(fileName)
 
 
@@ -258,22 +256,17 @@ def VMFail(G_T, FailNode, x):
 
 
                                 # 更改业务工作路径
-                                a = G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupNode'].replace("[", '').replace("]",
-                                                                                                               '').join(
-                                    '\'\'')
-                                b = G_T.graph['VNF_info'].loc[VNFID, 'VNFDeployNode'].replace("[", '').replace("]",
-                                                                                                               '').join(
-                                    '\'\'')
+                                # a = G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupNode'].replace("[", '').replace("]",
+                                #                                                                                '').join(
+                                #     '\'\'')
+                                # b = G_T.graph['VNF_info'].loc[VNFID, 'VNFDeployNode'].replace("[", '').replace("]",
+                                #                                                                                '').join(
+                                #     '\'\'')
+                                a = G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupNode'].strip('[]')
+                                b = G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupNode'].strip('[]s')
                                 print('---节点%s倒换到节点%s' % (a,b))
                                 # print('backup node:', a, 'deploy node:', b)
                                 newPath = shortestPath(G_T, b)
-
-                                '''
-                                G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath'] = \
-                                    G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath'].join(
-                                        '\'\'').replace(a, b).strip('\'')
-                                '''
-
                                 G_T.graph['Application_info'].at[appID, 'ApplicationWorkPath'] = str(newPath)
                                 # print('after set path:', G_T.graph['Application_info'].loc[appID, 'ApplicationWorkPath'])
 
@@ -394,6 +387,7 @@ def serverFail(G_T, FailNode, x):
                         backupNode = VNF_df.loc[VNF_i, 'VNFBackupNode']
                         VNF_df.at[VNF_i, 'VNFDeployNode'] = backupNode
                         VNF_df.at[VNF_i, 'VNFBackupNode'] = deployNode
+                        print('---节点%s倒换到节点%s' % (deployNode.strip('[]'), backupNode.strip('[]')))
                     else:
                         Backup_fail.append(VNF_i)
                 else:
@@ -412,26 +406,19 @@ def serverFail(G_T, FailNode, x):
                     DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # '[V1]'
                     node = DeployNode.strip('[]')  # ['V1']
                     update_DeployNode = DeployNode.replace(node, server_vm[i])  # '[V7]'     # 前换成后   输入、结果都为str格式
-                    print('---节点%s倒换到节点%s' % (node, server_vm[i]))
-
                     VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode
                     print('---节点%s迁移到节点%s' % (node, update_DeployNode))
-
                 elif VNF_df.loc[VNF_list[i], 'VNFBackupType'] == '主备':
                     if VNF_list[i] in Backup_ok:  # 备好的vnf  迁移的是其备节点
                         BackupNode = VNF_df.loc[VNF_list[i], 'VNFBackupNode']  # '[V1]'
                         node = BackupNode.strip('[]') # ['V1']
                         update_BackupNode = BackupNode.replace(node, server_vm[i])  # '[V7]'     # 前换成后   输入、结果都为str格式
-                        print('---节点%s倒换到节点%s'%(node,server_vm[i]))
-
                         VNF_df.loc[VNF_list[i], 'VNFBackupNode'] = update_BackupNode
                         print('---节点%s迁移到节点%s' % (node, update_BackupNode))
                     else:  # 备断的vnf  迁移的是部署节点
                         DeployNode = VNF_df.loc[VNF_list[i], 'VNFDeployNode']  # '[V1]'
                         node = DeployNode.strip('[]')  # ['V1']
                         update_DeployNode = DeployNode.replace(node,server_vm[i])  # '[V7]'     # 前换成后   输入、结果都为str格式
-                        print('---节点%s倒换到节点%s'%(node,server_vm[i]))
-
                         VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode
                         print('---节点%s迁移到节点%s' % (node, update_DeployNode))
 
@@ -440,10 +427,8 @@ def serverFail(G_T, FailNode, x):
                     node = VNF_df.loc[VNF_list[i], 'VNFDeployNode'].strip('[]').split(',')  # ['V1','V3']
                     tmp1 = [val for val in fail_server_vm if val in node]  # 如 ['V1']
                     update_DeployNode = DeployNode.replace(tmp1[0], server_vm[i])  # 如'[V7,V3]'
-                    print('---节点%s倒换到节点%s'%(tmp1[0],server_vm[i]))
-
                     VNF_df.loc[VNF_list[i], 'VNFDeployNode'] = update_DeployNode
-                    print('---节点%s迁移到节点%s' % (tmp1[0], update_DeployNode))
+                    print('---节点%s迁移到节点%s' % (tmp1[0], server_vm[i]))
 
             # 根据VNF部署节点 获取新工作路径path  更新业务工作路径
             for VNF_i in VNF_list:  # ['VNF1']

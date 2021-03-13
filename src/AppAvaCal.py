@@ -75,7 +75,8 @@ def test_T():
     for T in [10,20,50,100,200]:
         t1 = time.time()
         single_app_avail, whole_app_avail = app_ava_cal(file, T, N)
-        single_app_avail.to_excel('128server_result_(N100T%d).xlsx'%T)
+        single_app_avail.to_excel(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")\
+            + os.sep+"data"+os.sep+'128server_result_(N100T%d).xlsx'%T)
         t2 = time.time()
         result_i = single_app_avail['result']
         result_i['whole'] = whole_app_avail
@@ -94,13 +95,14 @@ def test_N():
     for N in [10,50,100,200,500]:
         t1 = time.time()
         single_app_avail, whole_app_avail = app_ava_cal(file, T, N)
-        single_app_avail.to_excel('128server_result_(T200N%d).xlsx'%N)
+        single_app_avail.to_excel(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")\
+            + os.sep+"data"+os.sep+'128server_result_(T200N%d).xlsx'%N)
         t2 = time.time()
         result_i = single_app_avail['result']
         result_i['whole'] = whole_app_avail
         result_i['time'] = t2-t1
         result[N] = result_i
-        result.to_excel("N.xlsx")
+        result.to_excel("data"+os.sep+"N.xlsx")
     return result
 
 
@@ -114,13 +116,15 @@ def test_N_4():
     for N in [10]:
         t1 = time.time()
         single_app_avail, whole_app_avail = app_ava_cal(file, T, N)
-        single_app_avail.to_excel('4server_result_(T200N%d).xlsx'%N)
+        single_app_avail.to_excel(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")\
+            + os.sep+"data"+os.sep+'4server_result_(T200N%d).xlsx'%N)
         t2 = time.time()
         result_i = single_app_avail['result']
         result_i['whole'] = whole_app_avail
         result_i['time'] = t2-t1
         result[N] = result_i
-        result.to_excel("N.xlsx")
+        result.to_excel(os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")\
+            + os.sep+"data"+os.sep+"N.xlsx")
     return result
 
 

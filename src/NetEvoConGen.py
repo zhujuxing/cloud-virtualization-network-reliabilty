@@ -293,7 +293,7 @@ def net_evo_con_gen(Gpath, T):
     """
     Parameters
     ----------
-    Gpath : string
+    Gpath : string or CloudVirtualizedNetwork
         演化对象数据gpickle路径，如'g.gpickle',
     T : TYPE
         演化周期，单位年
