@@ -47,6 +47,7 @@ def app_ava_cal(file,T,N):
 
     for i in range(N):
         g_T = copy.deepcopy(g) #这里之前用的是copy.copy浅拷贝，导致后续修改g_T的时候使得g里的数据也发生了变动
+        # g_T = g.copy()
         evol = NetEvoConGen.net_evo_con_gen(g_T, T)
         g_T= NetEvoRulAna.net_evo_rul_ana(g_T, evol) # 修改net_evo_rul_ana_test为正式版函数名
         single_app_avail[i+1] = g_T.graph['Application_info']['ApplicationDownTime'].apply(lambda x:1-(x/(T*365*24)))
