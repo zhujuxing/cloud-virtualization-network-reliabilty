@@ -8,9 +8,9 @@ Created on Thu Dec 31 05:37:33 2020
 # import networkx as nx
 import pandas as pd
 import numpy as np
-import NetEvoObjMod
-import NetEvoConGen
-import NetEvoRulAna
+import src.NetEvoObjMod as NetEvoObjMod
+import src.NetEvoConGen as NetEvoConGen
+import src.NetEvoRulAna as NetEvoRulAna
 import os
 import time
 import copy

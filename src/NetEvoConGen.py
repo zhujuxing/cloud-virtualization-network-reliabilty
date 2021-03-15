@@ -12,7 +12,7 @@ import math
 import re
 import os
 import time
-from NetEvoObjMod import CloudVritualizedNetwork
+from src.NetEvoObjMod import CloudVritualizedNetwork
 
 
 def init(Gpath, T):

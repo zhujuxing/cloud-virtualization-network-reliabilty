@@ -11,15 +11,17 @@ from typing import List, Any
 
 import networkx as nx
 import pandas as pd
-import NetEvoConGen
-from NetEvoObjMod import CloudVritualizedNetwork
+import src.NetEvoConGen
+from src.NetEvoObjMod import CloudVritualizedNetwork
 import copy
 import os
 import openpyxl
 import collections
 from openpyxl import load_workbook
-from NetEvoConGen import convert
+from src.NetEvoConGen import convert
 import random
+
+from src.DrawNetworkApplication import DrawNetworkApplicaiton
 
 # TODO: shortestPath 函数中都是从D1寻找至新VNF的路径，考虑后续是否要通过其它DCGW走
 
@@ -51,6 +53,10 @@ def net_evo_rul_ana(g, fname):
 
 
     def rul_ana(x):
+        # file_name = os.path.abspath(
+        #     os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'data' + os.sep + '云化虚拟网络%s.png' % \
+        #             x["EvolTime"][0]
+        # DrawNetworkApplicaiton(G_T, file_name)
         print("时间为%s的网络演化已经执行" % x['EvolTime'])
         # print(x['EvolTime'], 'Fail: ', x['EvolFailNodesSet'], 'Reco：', x['EvolRecoNodesSet'], '\n')
         for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
@@ -82,6 +88,8 @@ def net_evo_rul_ana(g, fname):
                 if Nodetype == 'V':  # 故障节点为VM
                     print("***VM节点%s故障" % FailNode)
                     VMFail(G_T, FailNode, x)
+            # 画图
+
 
     # evol.apply(rul_ana, axis=1)
     for evol_eachtime in evol.iterrows():
