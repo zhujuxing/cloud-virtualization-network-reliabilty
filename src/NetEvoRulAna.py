@@ -11,13 +11,9 @@ from typing import List, Any
 
 import networkx as nx
 import pandas as pd
-import src.NetEvoConGen
+# from src.NetEvoConGen import net_evo_con_gen
 from src.NetEvoObjMod import CloudVritualizedNetwork
-import copy
 import os
-import openpyxl
-import collections
-from openpyxl import load_workbook
 from src.NetEvoConGen import convert
 import random
 
@@ -166,22 +162,8 @@ def saveLog():
         +os.sep+"log"+os.sep+("AppDownTimeLog%s.xlsx" % (time_now_date + str(time_now_milsec)+"mils"))
     appDownTimeDF.to_excel(fileName)
 
-
-    # fileName = os.path.abspath(
-    #     os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'AppDownTimeLog.xlsx'
-    # if os.path.isfile(fileName):
-    #     pass
-    # else:
-    #     wb = openpyxl.Workbook()
-    #     wb.save(fileName)
-    # with pd.ExcelWriter(fileName, engine="openpyxl", mode='a') as writer:
-    #     appDownTimeDF.to_excel(writer, sheet_name=sheetName)
-
     Uplist.clear()
     Downlist.clear()
-    # upDF.iloc[0:0]
-    # downDF.iloc[0:0]
-    # appDownTimeDF.iloc[0:0]
 
 
 # 针对硬件故障节点，如DCGW，EOR，TOR的处理方式
@@ -264,14 +246,8 @@ def VMFail(G_T, FailNode, x):
 
 
                                 # 更改业务工作路径
-                                # a = G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupNode'].replace("[", '').replace("]",
-                                #                                                                                '').join(
-                                #     '\'\'')
-                                # b = G_T.graph['VNF_info'].loc[VNFID, 'VNFDeployNode'].replace("[", '').replace("]",
-                                #                                                                                '').join(
-                                #     '\'\'')
                                 a = G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupNode'].strip('[]')
-                                b = G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupNode'].strip('[]s')
+                                b = G_T.graph['VNF_info'].loc[VNFID, 'VNFBackupNode'].strip('[]')
                                 print('---节点%s倒换到节点%s' % (a,b))
                                 # print('backup node:', a, 'deploy node:', b)
                                 newPath = shortestPath(G_T, b)
