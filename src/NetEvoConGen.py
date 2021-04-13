@@ -324,21 +324,22 @@ def net_evo_con_gen(Gpath, T):
 
 def test_gin():
     pass
+
+def test():
+    # 仿真时间100年，单位小时
+    t_start = time.time()
+    T = 1000
+    Gpath = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'g.gpickle'
+    # Gpath = g
+    evol = net_evo_con_gen(Gpath, T)
+    evol.to_excel('evol.xlsx')
+    t_end = time.time()
+    print(t_end-t_start)
+    return evol
+
 if __name__ == '__main__':
-    def test():
-        # 仿真时间100年，单位小时
-        t_start = time.time()
-        T = 1000
-        Gpath = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'g.gpickle'
-        # Gpath = g
-        evol = net_evo_con_gen(Gpath, T)
-        evol.to_excel('evol.xlsx')
-        t_end = time.time()
-        print(t_end-t_start)
-        return evol
-    
     evol = test()
     # 测验演化态中的V6节点出现规律
-    print(evol.loc[evol['EvolFailNodesSet'].isin([['V6'],])])
+    # print(evol.loc[evol['EvolFailNodesSet'].isin([['V6']])])
     # print(node_info_show)
     
