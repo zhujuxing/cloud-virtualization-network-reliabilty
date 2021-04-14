@@ -332,7 +332,7 @@ def test():
     Gpath = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'g.gpickle'
     # Gpath = g
     evol = net_evo_con_gen(Gpath, T)
-    evol.to_excel('evol.xlsx')
+    # evol.to_excel('evol.xlsx')
     t_end = time.time()
     print(t_end-t_start)
     return evol

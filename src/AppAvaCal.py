@@ -16,10 +16,20 @@ import time
 import copy
 
 
-# def app_single_cal(file,T,N):
-#
+def app_single_cal(file, T):
+    g = NetEvoObjMod.CloudVritualizedNetwork(file)
 
-def app_ava_cal(file,T,N):
+    g_T = copy.deepcopy(g) #这里之前用的是copy.copy浅拷贝，导致后续修改g_T的时候使得g里的数据也发生了变动
+    evol = NetEvoConGen.net_evo_con_gen(g_T, T)
+    g_T= NetEvoRulAna.net_evo_rul_ana(g_T, evol) # 修改net_evo_rul_ana_test为正式版函数名
+    result =  g_T.graph['Application_info']['ApplicationDownTime'].apply(lambda x:1-(x/(T*365*24)))
+    # NetEvoRulAna.saveLog()
+    NetEvoRulAna.clearVar()
+    del g_T
+    return result
+
+
+def app_ava_cal(file, T, N):
     """
     该函数为业务可用度计算主函数。
 
@@ -132,4 +142,48 @@ def test_N_4():
 if __name__ == '__main__':
     # result_T = test_T()
     # result_N = test_N()
-    test_N_4()
+    # test_N_4()
+    T = 200
+    file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".") \
+           +os.sep+'test'+os.sep+"file.xlsx"
+    # result = app_single_cal(file, T)
+
+    import time
+    def time_it(func):
+        print('-------------执行函数----------------')
+        t1 = time.time()
+        func()
+        t2 = time.time()
+        print('-------------执行结束----------------')
+        print(t2-t1)
+
+    N = 10
+    # @time_it
+    # def single_thread():
+    #     for i in range(N):
+    #         app_single_cal(file, T)
+    #
+    # @time_it
+    # def multi_thread():
+    #     import threading
+    #     for i in range(N):
+    #         t = threading.Thread(target=app_single_cal,args=(file, T))
+    #         t.start()
+
+    def thread_pool_m():
+        import multiprocessing
+
+        process_que = []
+        for i in range(N):
+            process_que.append(multiprocessing.Process(target=app_single_cal, args=(file, T)))
+
+        for t in process_que:
+            t.start()
+
+    t1 = time.time()
+    thread_pool_m()
+    t2 = time.time()
+    print(t2-t1)
+
+
+
