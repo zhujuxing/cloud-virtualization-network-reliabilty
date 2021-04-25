@@ -164,12 +164,12 @@ def test_different_T():
     return evol
 
 if __name__ == '__main__':
-    T = 100
+    T = 1000
     Gpath = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'g.gpickle'
 
     # test_singe_componet_single_failmode(T,Gpath)
     # test_single_componet_multi_failmode()
     # test_multi_component_multi_failmode()
     # test_different_T()
-    test_singe_componet_single_failmode_multiTimes(T, Gpath, 50)
+    test_singe_componet_single_failmode_multiTimes(T, Gpath, 100)
 

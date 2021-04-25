@@ -1,0 +1,82 @@
+\begin{thebibliography}{10}
+
+\bibitem{beyer2016site}
+B.~Beyer, C.~Jones, J.~Petoff, and N.~R. Murphy, {\em Site reliability
+  engineering: How Google runs production systems}.
+\newblock " O'Reilly Media, Inc.", 2016.
+
+\bibitem{AlahmadAgarwal-754}
+Y.~Alahmad and A.~Agarwal, ``Vnf placement strategy for availability and
+  reliability of network services in nfv,'' 2019.
+
+\bibitem{wang2021availability}
+M.~Wang, B.~Cheng, S.~Wang, and J.~Chen, ``Availability-and traffic-aware
+  placement of parallelized sfc in data center networks,'' {\em IEEE
+  Transactions on Network and Service Management}, vol.~18, no.~1,
+  pp.~182--194, 2021.
+
+\bibitem{qu2018reliability}
+L.~Qu, M.~Khabbaz, and C.~Assi, ``Reliability-aware service chaining in
+  carrier-grade softwarized networks,'' {\em IEEE Journal on Selected Areas in
+  Communications}, vol.~36, no.~3, pp.~558--573, 2018.
+
+\bibitem{qu2019reliability}
+L.~Qu, C.~Assi, M.~J. Khabbaz, and Y.~Ye, ``Reliability-aware service function
+  chaining with function decomposition and multipath routing,'' {\em IEEE
+  Transactions on Network and Service Management}, vol.~17, no.~2,
+  pp.~835--848, 2019.
+
+\bibitem{kim2009availability}
+D.~S. Kim, F.~Machida, and K.~S. Trivedi, ``Availability modeling and analysis
+  of a virtualized system,'' in {\em 2009 15th IEEE Pacific Rim International
+  Symposium on Dependable Computing}, pp.~365--371, IEEE, 2009.
+
+\bibitem{di2017availability}
+M.~Di~Mauro, M.~Longo, F.~Postiglione, and M.~Tambasco, ``Availability modeling
+  and evaluation of a network service deployed via nfv,'' in {\em International
+  Tyrrhenian Workshop on Digital Communication}, pp.~31--44, Springer, 2017.
+
+\bibitem{farooq2015continuous}
+H.~Farooq, M.~S. Parwez, and A.~Imran, ``Continuous time markov chain based
+  reliability analysis for future cellular networks,'' in {\em 2015 IEEE Global
+  Communications Conference (GLOBECOM)}, pp.~1--6, IEEE, 2015.
+
+\bibitem{di2018availability}
+M.~Di~Mauro, M.~Longo, and F.~Postiglione, ``Availability evaluation of
+  multi-tenant service function chaining infrastructures by multidimensional
+  universal generating function,'' {\em IEEE Transactions on Services
+  Computing}, 2018.
+
+\bibitem{MauroGalatro-760}
+M.~D. Mauro, G.~Galatro, M.~Longo, and F.~Postiglione, ``Ip multimedia
+  subsystem in an nfv environment: availability evaluation and sensitivity
+  analysis,'' 2018.
+
+\bibitem{MauroLongo-765}
+M.~D. Mauro, M.~Longo, F.~Postiglione, G.~Carullo, and M.~Tambasco, ``Service
+  function chaining deployed in an nfv environment: an availability modeling,''
+  2017.
+
+\bibitem{TolaJiang-743}
+B.~Tola, Y.~Jiang, and B.~E. Helvik, ``On the resilience of the nfv-mano: An
+  availability model of a cloud-native architecture,'' pp.~1--7, IEEE, 2020.
+\newblock Conference Proceedings ER -.
+
+\bibitem{TolaJiang-759}
+B.~Tola, Y.~Jiang, and B.~E. Helvik, ``On the resilience of the nfv-mano: An
+  availability model of a cloud-native architecture,'' 2020.
+
+\bibitem{NakamuraAdams-750}
+H.~Nakamura, R.~Adams, S.~Arntzen, Z.~Htike, E.~Iwasa, K.~Shinohara,
+  A.~Shirato, C.~Lac, S.~Ni, S.~Oechsner, M.~Schöller, and P.~Vaananen, ``Etsi
+  gs nfv-rel 003: Network functions virtualisation (nfv);reliability;report on
+  models and features for end-to-end reliability,'' tech. rep., 2016.
+
+\bibitem{SchollerKhan-751}
+M.~Schöller, N.~Khan, R.~Adams, S.~Arntzen, S.~Asadullah, R.~Breault,
+  D.~Hutchison, U.~Janssen, C.~Lac, J.~Logan, V.~Mendiratta, S.~Ni,
+  Y.~Noishiki, M.~Shaikh, J.~Sterbenz, S.~Sud, P.~Tarapore, A.~Xiang,
+  H.~Yokota, F.~Zdarsky, and N.~Zong, ``Etsi gs nfv-rel 001: Network functions
+  virtualisation (nfv); resiliency requirements,'' tech. rep., 2015.
+
+\end{thebibliography}

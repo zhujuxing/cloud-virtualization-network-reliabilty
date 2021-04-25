@@ -187,6 +187,9 @@ class CloudVritualizedNetwork(nx.Graph):
         print(tabulate(self.graph['Application_info'], headers=['业务名称',  '    业务逻辑路径','可用度','  状态', '   初始流量', '     流量',  '     阈值','      中断时间','           工作路径']), '\n')
 
     def update_app_work_path(self):
+        '''
+        该函数为更新业务工作路径的函数，根据VNF更新业务工作路径
+        '''
         VNF_info = self.graph['VNF_info']
         def find_work_path(x,VNF_info):
             logic_path = x['ApplicationVNFs']
@@ -197,9 +200,6 @@ class CloudVritualizedNetwork(nx.Graph):
                 logic_path = logic_path.strip('[]').split(',')
             except:
                 pass
-            # entrance_device = logic_path[0]
-            # exit_device = logic_path[-1]
-            # logic_path = logic_path[1:-1]
             work_path = []
             for i in range(len(logic_path)-1):
                 source = logic_path[i]

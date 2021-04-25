@@ -161,7 +161,7 @@ def DrawNetworkApplicaiton(g, filename):
 
 def test():
     file = os.path.abspath(os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'file.xlsx'
-    network = NetEvoObjMod.CloudVritualizedNetwork(file)
+    network = src.NetEvoObjMod.CloudVritualizedNetwork(file)
     fname = os.path.abspath(os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'data' + os.sep + '云化虚拟网络.png'
     DrawNetworkApplicaiton(network, fname)
 

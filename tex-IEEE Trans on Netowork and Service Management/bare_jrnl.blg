@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99d (TeX Live 2020/W32TeX)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: bare_jrnl.aux
+The style file: ieeetr.bst
+Database file #1: ref.bib
+Warning--empty booktitle in TolaJiang-743
+Warning--empty institution in NakamuraAdams-750
+Warning--empty institution in SchollerKhan-751
+You've used 15 entries,
+            1876 wiz_defined-function locations,
+            555 strings with 6844 characters,
+and the built_in function-call counts, 3987 in all, are:
+= -- 331
+> -- 264
+< -- 0
++ -- 93
+- -- 78
+* -- 313
+:= -- 618
+add.period$ -- 17
+call.type$ -- 15
+change.case$ -- 16
+chr.to.int$ -- 0
+cite$ -- 18
+duplicate$ -- 170
+empty$ -- 355
+format.name$ -- 78
+if$ -- 927
+int.to.chr$ -- 0
+int.to.str$ -- 15
+missing$ -- 10
+newline$ -- 50
+num.names$ -- 15
+pop$ -- 71
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 106
+stack$ -- 0
+substring$ -- 180
+swap$ -- 54
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 3
+while$ -- 35
+width$ -- 17
+write$ -- 137
+(There were 3 warnings)

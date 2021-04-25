@@ -99,50 +99,53 @@ def fail_state(x, T, node_info):
                 delta = random.random()
                 t_f  = -math.log(delta) * MTBF
                 t_hr = -math.log(delta) * MTTR
+                # 首先看是否检测到故障
                 if random.random() < FDR:
                     t_r = FDT
-                    if row[1]['NodeType'] in ('Server','DCGW','TOR'):
+                    # 对于硬件节点，维修时间即为叫人维修的时间
+                    if row[1]['NodeType'] in ('Server','DCGW','EOR','TOR'):
                         t_r += u_asp + t_hr
+                    # 对于软件节点，维修时间需要根据是否自动维修确定
                     else:
+                        # 自动维修
                         if random.random() < AFRR:
                             t_r += AFRT
+                        # 人工维修
                         else:
                             t_r += u_asp + t_hr
-                            if (t_f + t) <= T:
-                                fail_time[i].append(t + t_f)
-                            else:
-                                break
-                            if (t + t_f + t_r) <= T:
-                                reco_time[i].append(t + t_f + t_r)
-                                #t = t + t_f + t_r
-                                break
-                            else:
-                                break
+                            # if (t_f + t) <= T:
+                            #     fail_time[i].append(t + t_f)
+                            # else:
+                            #     break
+                            # if (t + t_f + t_r) <= T:
+                            #     reco_time[i].append(t + t_f + t_r)
+                            #     #t = t + t_f + t_r
+                            #     break
+                            # else:
+                            #     break
                 else:
-                    if row[1]['NodeType'] in ('Server','DCGW','TOR'):
+
+                    if row[1]['NodeType'] in ('Server','DCGW','TOR','EOR'):
                         t_r = u_chk
-                        
                     else:
                         t_r = u_chk
-                        if (t_f + t) <= T:
-                            fail_time[i].append(t+t_f)
-                        else:
-                            break
-                        if (t + t_f + t_r) <= T:
-                            reco_time[i].append(t + t_f + t_r)
-                            #t = t + t_f + t_r
-                            break
-                        else:
-                            break
+                        # if (t_f + t) <= T:
+                        #     fail_time[i].append(t+t_f)
+                        # else:
+                        #     break
+                        # if (t + t_f + t_r) <= T:
+                        #     reco_time[i].append(t + t_f + t_r)
+                        #     break
+                        # else:
+                        #     break
                 if (t + t_f) <= T:
-                            fail_time[i].append(t+t_f)
+                    fail_time[i].append(t+t_f)
                 else:
-                            break
+                    break
                 if (t + t_f + t_r) <= T:
-                            reco_time[i].append(t + t_f + t_r)
+                    reco_time[i].append(t + t_f + t_r)
                 else:
-                            break    
-               
+                    break
                 t = t + t_f + t_r
         i += 1
     return fail_time, reco_time
