@@ -123,7 +123,7 @@ def test_N():
 
 
 def test_N_4():
-    T = 1
+    T = 1000
     # file = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'file.xlsx'
     file = os.path.abspath(os.path.dirname(os.getcwd()) + os.path.sep + ".") \
            + os.sep + 'test' + os.sep + "file.xlsx"

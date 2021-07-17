@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.7.4)  22 APR 2021 12:46
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (TeX Live 2020/W32TeX) (preloaded format=pdflatex 2020.7.4)  21 MAY 2021 22:47
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -342,10 +342,68 @@ G,.JBIG2,.JB2,.eps]
 (c:/texlive/2020/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
-)) [1{c:/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
+))
+
+LaTeX Warning: Citation `beyer2016site' on page 1 undefined on input line 475.
+
+
+LaTeX Warning: Citation `AlahmadAgarwal-754' on page 1 undefined on input line 
+478.
+
+
+LaTeX Warning: Citation `wang2021availability' on page 1 undefined on input lin
+e 478.
+
+
+LaTeX Warning: Citation `qu2018reliability' on page 1 undefined on input line 4
+78.
+
+
+LaTeX Warning: Citation `qu2019reliability' on page 1 undefined on input line 4
+78.
+
+
+LaTeX Warning: Citation `kim2009availability' on page 1 undefined on input line
+ 484.
+
+
+LaTeX Warning: Citation `di2017availability' on page 1 undefined on input line 
+486.
+
+
+LaTeX Warning: Citation `farooq2015continuous' on page 1 undefined on input lin
+e 496.
+
+
+LaTeX Warning: Citation `di2018availability' on page 1 undefined on input line 
+498.
+
+[1{c:/texlive/2020/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 
 ]
+
+LaTeX Warning: Citation `MauroGalatro-760' on page 2 undefined on input line 50
+6.
+
+
+LaTeX Warning: Citation `MauroLongo-765' on page 2 undefined on input line 506.
+
+
+
+LaTeX Warning: Citation `TolaJiang-743' on page 2 undefined on input line 509.
+
+
+LaTeX Warning: Citation `TolaJiang-759' on page 2 undefined on input line 509.
+
+
+LaTeX Warning: Citation `NakamuraAdams-750' on page 2 undefined on input line 5
+15.
+
+
+LaTeX Warning: Citation `SchollerKhan-751' on page 2 undefined on input line 51
+5.
+
 Package epstopdf Info: Source file: <img/1.eps>
 (epstopdf)                    date: 2021-03-21 13:55:08
 (epstopdf)                    size: 934999 bytes
@@ -361,7 +419,7 @@ File: img/1-eps-converted-to.pdf Graphic file (type pdf)
 <use img/1-eps-converted-to.pdf>
 Package pdftex.def Info: img/1-eps-converted-to.pdf  used on input line 552.
 (pdftex.def)             Requested size: 216.81pt x 143.55463pt.
- [2 <./img/1-eps-converted-to.pdf>]
+[2 <./img/1-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <img/2.eps>
 (epstopdf)                    date: 2021-03-21 14:24:01
 (epstopdf)                    size: 296118 bytes
@@ -482,10 +540,6 @@ File: img/10-eps-converted-to.pdf Graphic file (type pdf)
 Package pdftex.def Info: img/10-eps-converted-to.pdf  used on input line 764.
 (pdftex.def)             Requested size: 216.81pt x 146.67163pt.
 
-Overfull \hbox (35.13411pt too wide) in paragraph at lines 780--792
- [][] 
- []
-
 
 LaTeX Warning: Reference `Figure 11' on page 5 undefined on input line 794.
 
@@ -508,27 +562,17 @@ File: img/12-eps-converted-to.pdf Graphic file (type pdf)
 <use img/12-eps-converted-to.pdf>
 Package pdftex.def Info: img/12-eps-converted-to.pdf  used on input line 825.
 (pdftex.def)             Requested size: 216.81pt x 43.13313pt.
-./bare_jrnl.tex:845: Extra alignment tab has been changed to \cr.
-<template> \egroup \endtemplate 
-                                
-l.845         R_{Vs/Lb} &=&
-                            R_{VNF1\_1}  \nonumber\\
-You have given more \span or & marks than there were
-in the preamble to the \halign or \valign now in progress.
-So I'll assume that you meant to type \cr instead.
+
+Overfull \hbox (9.85565pt too wide) in alignment at lines 842--848
+ [][][] []
+ []
 
 
-./bare_jrnl.tex:846: LaTeX Error: Too many columns in eqnarray environment.
-
-See the LaTeX manual or LaTeX Companion for explanation.
-Type  H <return>  for immediate help.
- ...                                              
-                                                  
-l.846                   &
-                         =& R_{VNF1\_2} = R_{VNF2\_M} = R_{VNF2\_S}     \non...
-
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
+Overfull \hbox (3.82307pt too wide) detected at line 861
+\OML/cmm/m/it/10 R[] \OT1/cmr/m/n/10 = 0\OML/cmm/m/it/10 :\OT1/cmr/m/n/10 99999
+08667951362\OML/cmm/m/it/10 ; R[] \OT1/cmr/m/n/10 = 0\OML/cmm/m/it/10 :\OT1/cmr
+/m/n/10 9999879560119541
+ []
 
 
 Overfull \hbox (24.3595pt too wide) in paragraph at lines 870--878
@@ -578,10 +622,10 @@ LaTeX Warning: There were multiply-defined labels.
 
  ) 
 Here is how much of TeX's memory you used:
- 3801 strings out of 480608
- 59969 string characters out of 5907537
- 320722 words of memory out of 5000000
- 19627 multiletter control sequences out of 15000+600000
+ 3786 strings out of 480608
+ 59690 string characters out of 5907537
+ 319671 words of memory out of 5000000
+ 19612 multiletter control sequences out of 15000+600000
  571593 words of font info for 90 fonts, out of 8000000 for 9000
  1144 hyphenation exceptions out of 8191
  34i,12n,29p,1430b,253s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -598,7 +642,7 @@ ts/type1/urw/times/utmb8a.pfb><c:/texlive/2020/texmf-dist/fonts/type1/urw/times
 /utmbi8a.pfb><c:/texlive/2020/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><c:/t
 exlive/2020/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
 Output written on C:/Users/zhujuxing/Desktop/cloud-virtualization-network-relia
-bilty/out/bare_jrnl.pdf (8 pages, 988342 bytes).
+bilty/out/bare_jrnl.pdf (8 pages, 988230 bytes).
 PDF statistics:
  920 PDF objects out of 1000 (max. 8388607)
  484 compressed objects within 5 object streams

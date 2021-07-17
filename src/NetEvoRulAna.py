@@ -44,10 +44,6 @@ def net_evo_rul_ana(g, fname):
         raise Exception("请给出正确的演化条件文件或数据输入。")
 
     def rul_ana(x):
-        # file_name = os.path.abspath(
-        #     os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'data' + os.sep + '云化虚拟网络%s.png' % \
-        #             x["EvolTime"][0]
-        # DrawNetworkApplicaiton(G_T, file_name)
         print("时间为%s的网络演化已经执行" % x['EvolTime'])
         # print(x['EvolTime'], 'Fail: ', x['EvolFailNodesSet'], 'Reco：', x['EvolRecoNodesSet'], '\n')
         for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
@@ -78,9 +74,7 @@ def net_evo_rul_ana(g, fname):
                 if Nodetype == 'V':  # 故障节点为VM
                     print("***VM节点%s故障" % FailNode)
                     VMFail(G_T, FailNode, x)
-            # 画图
 
-    # evol.apply(rul_ana, axis=1)
     for evol_eachtime in evol.iterrows():
         x = evol_eachtime[1]
         rul_ana(x)
@@ -191,6 +185,7 @@ def vSwitchFail(G_T, FailNode, x):
 
 
 def VMFail(G_T, FailNode, x):
+    fail_node_fdr = G_T.graph['Node_info'].loc[FailNode, "NodeFailFDR"]
     for VNFID, VNFDeployNode in G_T.graph['VNF_info']['VNFDeployNode'].items():
         nodes = VNFDeployNode
         nodes = str(nodes).replace("[", '').replace("]", '')
@@ -210,8 +205,13 @@ def VMFail(G_T, FailNode, x):
                             continue
 
             if G_T.graph['VNF_info']['VNFBackupType'][VNFID] == '主备':
-                if (G_T.graph['VNF_info']['VNFBackupNode'][VNFID].replace('[', '').replace(']', '') in x[
-                    'EvolFailNodesSet']):  # 备用路径中断，记录下此时的故障时间
+                switch_flag = False
+                if random.random() < fail_node_fdr:
+                    if not (G_T.graph['VNF_info']['VNFBackupNode'][VNFID].replace('[', '').replace(']', '') in x[
+                    'EvolFailNodesSet']):
+                        switch_flag = True
+
+                if not switch_flag:  # 备用路径中断，记录下此时的故障时间
                     for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
                         if status == 0:
                             continue
@@ -223,7 +223,6 @@ def VMFail(G_T, FailNode, x):
                             else:
                                 continue
                 else:  # 备用路径没有中断，VNF进行主备倒换
-                    # TODO: 增加倒换时业务中断的考虑
                     Node_name = G_T.graph['VNF_info'].loc[VNFID, 'VNFDeployNode']
                     G_T.graph['VNF_info'].loc[VNFID, 'VNFDeployNode'] = G_T.graph['VNF_info'].loc[
                         VNFID, 'VNFBackupNode']
@@ -253,18 +252,19 @@ def VMFail(G_T, FailNode, x):
                                 continue
 
             else:  # Nway性业务的故障处理
-                if (set(G_T.graph['VNF_info']['VNFDeployNode'][VNFID].replace('[', '').replace(']', '')
-                                .split(',')).issubset(set(x['EvolFailNodesSet']))):
-                    for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
-                        if status == 0:
-                            continue
-                        if status == 1:
-                            VNFs = G_T.graph['Application_info'].loc[appID, 'ApplicationVNFs']
-                            if (VNFID in VNFs):
-                                G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 0
-                                Downtime[appID] = float(x['EvolTime'][0])
-                            else:
+                fail_node_fdr = G_T.graph['Node_info'].loc[FailNode, "NodeFailFDR"]
+                if (set(G_T.graph['VNF_info']['VNFDeployNode'][VNFID].strip("[]").split(',')).issubset(set(x['EvolFailNodesSet']))):
+                    if random.random() < fail_node_fdr:
+                        for appID, status in G_T.graph['Application_info']['ApplicationStatus'].items():
+                            if status == 0:
                                 continue
+                            if status == 1:
+                                VNFs = G_T.graph['Application_info'].loc[appID, 'ApplicationVNFs']
+                                if (VNFID in VNFs):
+                                    G_T.graph['Application_info'].loc[appID, 'ApplicationStatus'] = 0
+                                    Downtime[appID] = float(x['EvolTime'][0])
+                                else:
+                                    continue
                 else:
                     continue
 
@@ -275,7 +275,7 @@ def serverFail(G_T, FailNode, x):
     edge_df = G_T.graph['Edge_info']
     node_df = G_T.graph['Node_info']
     if node_df.loc[FailNode, 'NodeVNF'] == 'NCE':
-        pass  # TODO: NCE 类型server故障未做处理
+        pass
     else:
         # 获取故障server的vm列表fail_server_vm
         fail_server_vm = []  # Vs子vm节点列表  如['V1', 'V2']
@@ -563,7 +563,11 @@ if __name__ == '__main__':
     #     os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'file_128server.xlsx')
     g = CloudVritualizedNetwork(os.path.abspath(
         os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'file.xlsx')
-    fname = os.path.abspath(
-        os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'RulAnaTestFile/evol_zjm.xlsx'
-    g_t = net_evo_rul_ana(g, fname)
+    # fname = os.path.abspath(
+        # os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'RulAnaTestFile/evol_zjm.xlsx'
+    evol = pd.DataFrame([[[1, 2], ["V1"], []],
+                         [[2, 3], [], ["V1"]]
+                         ],
+                        columns=["EvolTime", "EvolFailNodesSet", "EvolRecoNodesSet"])
+    g_t = net_evo_rul_ana(g, evol)
     # g.displayApp()

@@ -5,13 +5,15 @@ Created on Thu Dec 31 05:36:15 2020
 @author: zhujuxing
 """
 
+import math
+import os
+import random
+import re
+import time
+
 import networkx as nx
 import pandas as pd
-import random
-import math
-import re
-import os
-import time
+
 from src.NetEvoObjMod import CloudVritualizedNetwork
 
 
@@ -20,7 +22,7 @@ def init(Gpath, T):
     读取gpickle.Gpath表示gpickle路径，Tset表示演化时长
     '''
     # global T
-    Tset = T*365*24
+    Tset = T * 365 * 24
     # gpickle转换成DataFrame
     if type(Gpath) == str:
         # with open(Gpath, 'rb') as fo:
@@ -32,15 +34,14 @@ def init(Gpath, T):
 
     node_info = pd.DataFrame([turple[1] for turple in G.nodes(data=True)])
     node_info.insert(0, 'NodeID', [turple[0] for turple in G.nodes(data=True)])
-    
+
     # df = G.graph['Node_info'] # 修改：G对象已经有该信息了。
-    
+
     node_info.insert(3, 'FailureTime', 0)
     node_info.insert(4, 'RepairTime', 0)
     return Tset, node_info
-    
-    
-    
+
+
 def convert(x):
     '''
     转换数据格式，年、min-->小时
@@ -50,11 +51,11 @@ def convert(x):
         s = re.findall("\d+", x)[0]
         dig = int(s)
         if '年' in x:
-            return 365*24*dig
+            return 365 * 24 * dig
         if 'min' in x:
-            return dig/60
+            return dig / 60
         if 's' in x:
-            return dig/3600
+            return dig / 3600
         if 'h' in x:
             return dig
     else:
@@ -74,16 +75,16 @@ def fail_state(x, T, node_info):
     reco_time : 单个构件单个模式恢复列表
 
     '''
-    
+
     fail_time = []
     reco_time = []
 
-    fail_dt = node_info[node_info['NodeID'] == x['NodeID']] 
+    fail_dt = node_info[node_info['NodeID'] == x['NodeID']]
     fail_time = [[] for i in range(len(fail_dt))]
     reco_time = [[] for i in range(len(fail_dt))]
     i = 0
     for row in fail_dt.iterrows():
-        t = 0 
+        t = 0
         MTBF = convert(row[1]['NodeFailMTBF'])
         FDR = convert(row[1]['NodeFailFDR'])
         FDT = convert(row[1]['NodeFailFDT'])
@@ -93,53 +94,27 @@ def fail_state(x, T, node_info):
         u_asp = convert(row[1]['Tasp'])
         u_chk = convert(row[1]['Tchk'])
         while True:
-            if t>T:
+            if t > T:
                 break
             else:
                 delta = random.random()
-                t_f  = -math.log(delta) * MTBF
+                t_f = -math.log(delta) * MTBF
                 t_hr = -math.log(delta) * MTTR
                 # 首先看是否检测到故障
-                if random.random() < FDR:
-                    t_r = FDT
-                    # 对于硬件节点，维修时间即为叫人维修的时间
-                    if row[1]['NodeType'] in ('Server','DCGW','EOR','TOR'):
-                        t_r += u_asp + t_hr
-                    # 对于软件节点，维修时间需要根据是否自动维修确定
-                    else:
-                        # 自动维修
-                        if random.random() < AFRR:
-                            t_r += AFRT
-                        # 人工维修
-                        else:
-                            t_r += u_asp + t_hr
-                            # if (t_f + t) <= T:
-                            #     fail_time[i].append(t + t_f)
-                            # else:
-                            #     break
-                            # if (t + t_f + t_r) <= T:
-                            #     reco_time[i].append(t + t_f + t_r)
-                            #     #t = t + t_f + t_r
-                            #     break
-                            # else:
-                            #     break
+                t_r = FDT
+                # 对于硬件节点，维修时间即为叫人维修的时间
+                if row[1]['NodeType'] in ('Server', 'DCGW', 'EOR', 'TOR'):
+                    t_r += u_asp + t_hr
+                # 对于软件节点，维修时间需要根据是否自动维修确定
                 else:
-
-                    if row[1]['NodeType'] in ('Server','DCGW','TOR','EOR'):
-                        t_r = u_chk
+                    # 自动维修
+                    if random.random() < AFRR:
+                        t_r += AFRT
+                    # 人工维修
                     else:
-                        t_r = u_chk
-                        # if (t_f + t) <= T:
-                        #     fail_time[i].append(t+t_f)
-                        # else:
-                        #     break
-                        # if (t + t_f + t_r) <= T:
-                        #     reco_time[i].append(t + t_f + t_r)
-                        #     break
-                        # else:
-                        #     break
+                        t_r += u_asp + t_hr
                 if (t + t_f) <= T:
-                    fail_time[i].append(t+t_f)
+                    fail_time[i].append(t + t_f)
                 else:
                     break
                 if (t + t_f + t_r) <= T:
@@ -155,9 +130,9 @@ def singleFR(node_info, T):
     '''
     生成单个构件单个故障
     '''
-    temp = node_info.apply(lambda x:fail_state(x, T, node_info), axis=1)
-    node_info['FailureTime'] = temp.apply(lambda x: x[0]) 
-    node_info['RepairTime'] = temp.apply(lambda x: x[1]) 
+    temp = node_info.apply(lambda x: fail_state(x, T, node_info), axis=1)
+    node_info['FailureTime'] = temp.apply(lambda x: x[0])
+    node_info['RepairTime'] = temp.apply(lambda x: x[1])
 
     # global node_info1
     # 节点列属性添加失效、修复时间，属性值为[时间点列表]。
@@ -187,9 +162,9 @@ def common_ex(node_info1):
     合并单个构件时间点
     '''
     # temp不断被extend
-    temp = node_info1.apply(common_failure,axis=1)
+    temp = node_info1.apply(common_failure, axis=1)
     # 拆分temp
-    node_info1['FailureTime'] = temp.apply(lambda x: x[0]) 
+    node_info1['FailureTime'] = temp.apply(lambda x: x[0])
     node_info1['RepairTime'] = temp.apply(lambda x: x[1])
 
     return node_info1
@@ -207,12 +182,11 @@ def time_set_gen(node_info1):
     time_set = [i for i in time_set]
     time_set.sort()
 
-    print('演化态共有%d个'%len(time_set))
+    print('演化态共有%d个' % len(time_set))
     return time_set
 
 
-
-def Con_gen(node_info1,T,time_set):
+def Con_gen(node_info1, T, time_set):
     '''
     生成演化态
     '''
@@ -222,13 +196,13 @@ def Con_gen(node_info1,T,time_set):
     a = node_info1['FailureTime'].to_list()
     b = node_info1['RepairTime'].to_list()
     all_fall_edge_set = []
-    all_recover_edge_set = []   
+    all_recover_edge_set = []
     while t <= T:
         # print(t)
         fail_time_list = [i[0] if i != [] else T for i in a]
-                                                # 记录当前边状态改变(故障)的最先时间
+        # 记录当前边状态改变(故障)的最先时间
         recover_time_list = [i[0] if i != [] else T for i in b]
-                                                # 记录当前边状态改变(修复)的最先时间
+        # 记录当前边状态改变(修复)的最先时间
         fail_time = min(fail_time_list)
         recover_time = min(recover_time_list)
         fail_node_index = fail_time_list.index(fail_time)
@@ -245,52 +219,58 @@ def Con_gen(node_info1,T,time_set):
             b[recover_node_index] = b[recover_node_index][1:]
             # edges_info1.loc[recover_edge,'维修开始时间'] = edges_info1.loc[recover_edge,'维修开始时间'][1:]
         else:
-            break 
+            break
         all_fall_edge_set.append(fail_set)
         all_recover_edge_set.append(recover_set)
-        
+
         # i += 1
         # if t == time_set[-1]:
         #     break
         # if i>300:
         #     continue
-    evol = pd.DataFrame([all_fall_edge_set,all_recover_edge_set])
+    evol = pd.DataFrame([all_fall_edge_set, all_recover_edge_set])
     evol = evol.T
 
-    EvolTime = [time_set[i+1]-time_set[i] for i in range(len(time_set)-1)]
-    EvolTime.append(T-time_set[-1])
-    evol.columns=['EvolFailNodesSet', 'EvolRecoNodesSet']
-    try :
-        evol.insert(0, 'EvolTime' ,EvolTime)
+    EvolTime = [time_set[i + 1] - time_set[i] for i in range(len(time_set) - 1)]
+    EvolTime.append(T - time_set[-1])
+    evol.columns = ['EvolFailNodesSet', 'EvolRecoNodesSet']
+    try:
+        evol.insert(0, 'EvolTime', EvolTime)
     except:
-        evol.insert(0, 'EvolTime' ,EvolTime[:len(evol)])
+        evol.insert(0, 'EvolTime', EvolTime[:len(evol)])
     # return evol
     return evol
 
+
 def formating_data(evol):
     t = 0
+
     # global evol
     def time_add(x):
         nonlocal t
-        result = [t,t+x]
+        result = [t, t + x]
         t += x
         return result
+
     evol['EvolTime'] = evol['EvolTime'].apply(time_add)
     # evol['EvolFailNodesSet'] = evol['EvolFailNodesSet'].apply(lambda x:str(x))
     # evol['EvolRecoNodesSet'] = evol['EvolRecoNodesSet'].apply(lambda x:str(x))
-    
+
     fail_nodes_set = []
+
     def to_fail_nodes_set(x):
-        #调试是否有BUG
+        # 调试是否有BUG
         nonlocal fail_nodes_set
-        if len(x['EvolRecoNodesSet'])==0:
+        if len(x['EvolRecoNodesSet']) == 0:
             fail_nodes_set.append(x['EvolFailNodesSet'][0])
         else:
             fail_nodes_set.remove(x['EvolRecoNodesSet'][0])
         return fail_nodes_set.copy()
+
     # evol1 = evol.copy()
-    evol['EvolFailNodesSet'] = evol.apply(to_fail_nodes_set,axis = 1)
+    evol['EvolFailNodesSet'] = evol.apply(to_fail_nodes_set, axis=1)
     return evol
+
 
 def net_evo_con_gen(Gpath, T):
     """
@@ -309,40 +289,39 @@ def net_evo_con_gen(Gpath, T):
 
     """
     # global node_info_show
-    
+
     T, node_info = init(Gpath, T)
     # node_info_show = node_info
-    
-    node_info1 = singleFR(node_info,T)
-    
+
+    node_info1 = singleFR(node_info, T)
+
     node_info1 = common_ex(node_info1)
     time_set = time_set_gen(node_info1)
     # evol = Con_gen()
-    evol = Con_gen(node_info1,T,time_set)
+    evol = Con_gen(node_info1, T, time_set)
     evol = formating_data(evol)
     return evol
 
 
-    
-
 def test_gin():
     pass
+
 
 def test():
     # 仿真时间100年，单位小时
     t_start = time.time()
     T = 1000
-    Gpath = os.path.abspath(os.path.dirname(os.getcwd())+os.path.sep+".")+os.sep+'test'+os.sep+'g.gpickle'
+    Gpath = os.path.abspath(os.path.dirname(os.getcwd()) + os.path.sep + ".") + os.sep + 'test' + os.sep + 'g.gpickle'
     # Gpath = g
     evol = net_evo_con_gen(Gpath, T)
     # evol.to_excel('evol.xlsx')
     t_end = time.time()
-    print(t_end-t_start)
+    print(t_end - t_start)
     return evol
+
 
 if __name__ == '__main__':
     evol = test()
     # 测验演化态中的V6节点出现规律
     # print(evol.loc[evol['EvolFailNodesSet'].isin([['V6']])])
     # print(node_info_show)
-    

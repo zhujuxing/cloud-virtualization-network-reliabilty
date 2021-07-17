@@ -55,10 +55,13 @@
 % manually specify the path to it like:
 % \documentclass[journal]{../sty/IEEEtran}
 
-
+\usepackage{array}
 \usepackage{graphicx}
-\usepackage{algorithm}
-\usepackage{algorithmicx}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+%\usepackage{algorithm}
+%\usepackage{algorithmicx}
 \usepackage{algpseudocode}
 \usepackage{amsmath}
 
@@ -403,24 +406,7 @@
 % As a general rule, do not put math, special symbols or citations
 % in the abstract or keywords.
     \begin{abstract}
-        Application availability assessment is an important method to ensure the operation of cloud virtualized network.
-        Due to the adaption of network functions virtualization (NFV) based on virtualized technology, the application
-        of cloud virtualized network is not a chain of certain physical devices, but a chain of VNF dynamically depolyed
-        in servers, i.e., the service function chain (SFC). The current availability evaluation methods for SFC can be mainly
-        summarized as methods based on the tradition reliability evaluation method, system-state based methods,
-        component-state based methods and the comprehensive method that integrate these methods hierarchically. Although
-        these methods could evaluate the reliability of the application through certain physical devices, it would be
-        very hard to use these methods to evaluate the availability of these dynamical virtualized VNFs for  these
-        methods do not describe the dynamic mapping of VNFs and physical devices. Therefore, a network application availability
-        assessment algorithm based on network evolution is proposed in this paper. The network state is described by the
-        attributes of nodes, links, VNFs and applications in the network evolution object modelling. The state points in
-        a period of time which cause the changing of the system state are found in the network evolution condition.
-        The state of application is changed according to the network evolution rule when after the system state changed
-        and the application availability is calculated by the proposed algorithm. We have analyzed the complexity and convergence of the algorithm, and the
-        results show that the calculation results of the algorithm in this paper are convergent, and the calculation
-        complexity is O (to be determined), which solves the combination explosion problem of the existing evaluation
-        model.  Then, a comparison based on the RBD method is used to verify the correctness of the calculation results
-        of the method proposed in this paper through a small network case.
+        Application availability assessment is an important method to ensure the operation of cloud virtualized network.Due to the adaption of network functions virtualization (NFV) based on virtualized technology, the application of cloud virtualized network is not a chain of certain physical devices, but a chain of VNF dynamically depolyed in servers, i.e., the service function chain (SFC). The current availability evaluation methods for SFC can be mainly summarized as methods based on the tradition reliability evaluation method, system-state based methods, component-state based methods and the comprehensive method that integrate these methods hierarchically. Although these methods could evaluate the reliability of the application through certain physical devices, it would be very hard to use these methods to evaluate the availability of these dynamical virtualized VNFs for  these methods do not describe the dynamic mapping of VNFs and physical devices. Therefore, a network application availability assessment algorithm based on network evolution is proposed in this paper. The network state is described by the attributes of nodes, links, VNFs and applications in the network evolution object modelling. The state points in a period of time which cause the changing of the system state are found in the network evolution condition. The state of application is changed according to the network evolution rule when after the system state changed  and the application availability is calculated by the proposed algorithm. We have analyzed the complexity and convergence of the algorithm, and the  complexity is O (to be determined), which solves the combination explosion problem of the existing evaluation model.  Then, a comparison based on the RBD method is used to verify the correctness of the calculation results of the method proposed in this paper through a small network case.
 
 
 
@@ -517,26 +503,122 @@
     In order to solve the above problems, this article will propose an availability assessment method of cloud virtualized network, and calculate the availability value of all application. Due to limited space, the reliability of the business considered in this article is mainly considered at the level of whether the business is connected. The main contributions of this paper can be summarized as follows:
     
     1) The network application availability assessment method for cloud virtualized network based on network evolution is proposed. This network evolution method 
-    describe the dynamic behavior of the cloud virtualized network and could be used to analyze the other characteristic (for example, failure propagation) of this kind of dynamic virtualized network. The system state is generated by the program according to the network evolution condition and rule, so that the complete system state space is not needed to be analyzed by people before calculating the availability of application. Thus the complexity of this method is 
-    relatively low. And we can assess multiple application deployed on the same network at the same time, which to the best of our knowledge, is hardly done by the other method.
+    describe the dynamic behavior of the cloud virtualized network and could be used to analyze the other characteristic (for example, failure propagation) of this kind of dynamic virtualized network. The system state is generated by the program according to the network evolution condition and rule, so that the complete system state space is not needed to be analyzed by people before calculating the availability of application. Thus the complexity of this method is relatively low. And we can assess multiple application deployed on the same network at the same time, which to the best of our knowledge, is hardly done by the other method.
     
     2) The convergence and the correctness of the availability result calculated by this method is validated. The result shows that if the parameter is correctly chosen, the availability value converge below a certain error, and is in accordance with the availability calculated by RBD.
     
-    
-    
-    
+    The notation used in this paper is shown in .he rest of this article is organized as follow.
+	
+	 \begin{table}[!t]
+		\renewcommand{\arraystretch}{1.3}
+		\caption{Basic parameters}
+		\label{tabaa}
+		\centering
+		\begin{tabular}{|>{\raggedright\arraybackslash}p{1.4cm}||>{\raggedright\arraybackslash}p{6.4cm}|}
+			\hline
+			Symbol       & Discription                                         \\
+			\hline 
+			$T$		& Total calculation time period.\\
+			$N$		& Total calculation times.\\
+			\hline
+			\multicolumn{2}{|c|}{Nodes Information} \\
+			\hline
+			$N$		& Set of nodes(physical or virtual components), $N = \{n_1^{NT}, \dots, n_i^{NT}\}$ \\
+			$NT$	& Set of nodes types, for each node, $NT = {DCGW, EOR, TOR, Server, Vswitch, VNF}$ \\
+			\hline 
+			\multicolumn{2}{|c|}{Edges Information}\\
+			\hline
+			$E$		& Set of edges between nodes, $E=\{e_1,\dots,e_j\}$ \\
+			$ET$	& Set of edges types, for each edge, $ET = \{PE, VE\}$ \\
+			$SN_{e_j}$	& The source node of edge $e_j$ \\
+			$DN_{e_j}$	& The destination node of edge $e_j$ \\
+			\hline 
+			\multicolumn{2}{|c|}{Failures Information}\\
+			\hline
+			$FT$	& Set of fail types for each node, $FT^{n_i} = \{ft_1^{n_i}, \dots, ft_k^{n_i}\}$ \\
+			$FDR$	& Failure detection rate of failure type $ft_k^{n_i}$ \\
+			$FDT$	& Failure detection time of failure type $ft_k^{n_i} $\\
+			$FARR$	& Failure automatic repair rate of failure type $ft_k^{n_i}$ \\
+			$FART$	& Failure automatic repair time of failure type $ft_k^{n_i}$ \\
+			$MTBF$	& Mean time before failure type $ft_k^{n_i}$ \\
+			$MTTR$	& Mean time to repair by human of failure type $ft_k^{n_i}$ \\
+			\hline 
+		\end{tabular}
+	\end{table}
 
-%    1) In the evolutionary model modeling part proposed in this paper, a unified modeling of various heterogeneous nodes in a cloudized virtualized network is given, and the interconnection relationship between hardware and software nodes is considered. It provides a basis for how different types of failures cause business failures.
-
-%    2) In the network evolution condition part of this paper, how to consider the state simulation algorithm under the combined effect of different failure modes on the same node is given.
-%
-%    3) In the network evolution rules part of this article, in view of the different types of system state changes given by the network evolution conditions, the evolution rules of different node types are given.
-    
-    The rest of this article is organized as follow.
-
+	\begin{table}[!t]
+		\renewcommand{\arraystretch}{1.3}
+		\caption{State parameters}
+		\label{tabaa}
+		\centering
+		\begin{tabular}{|>{\raggedright\arraybackslash}p{1.4cm}||>{\raggedright\arraybackslash}p{6.4cm}|}
+			\hline
+			Symbol       & Discription                                         \\
+			\hline 
+			$G(t)$	& The cloud virtualized network at time t. $G(t) = \{C(t), VNF(t), VL(t), APP(t)\}$ \\
+			\hline
+			\multicolumn{2}{|c|}{Components State}\\
+			\hline
+			$C$		& Set of components in cloud virtualized network, $C = \{c_1, \dots, c_l\}, c_l \in N \cup E$\\
+			$S_{n_i}(t)$	& Failure state fo nodes $n_i$ at time $t$, $S_{n_i}(t) \in \{0,1\}$\\
+			$I_{n_i}(t)$	& Idle state fo nodes $n_i$ at time $t$, $I_{n_i}(t) \in \{0,1\}$\\
+			$DVNF_{c_l}(t)$	& Set of VNF deployed in components $c_l$ at time $t$.\\
+			$DVL_{c_l}(t)$	& Set of Vlink deployed in components $c_l$ at time $t$\\
+			\hline
+			\multicolumn{2}{|c|}{VNFs State}\\
+			\hline
+			$VNF$	& Set of VNFs, $VNF=\{vnf_1^{VT},\dots,vnf_m^{VT}\}$\\
+			$DT_{vnf_m}$	& Set of VNF data types, $BT_{vnf_m} \in \{Data, Control\}$\\
+			$BT_{vnf_m}$	& Set of VNF backup types, $BT_{vnf_m} \in \{VBT_1, VBT_2, VBT_3\}$. $VBT_1$ is the no-backup type, $VBT_2$ is the master-slayer backup type and $VBT_3$ is the load sharing type\\
+			$DN_{vnf_{k}}(t)$	& The master node deployed $vnf_m$ at time $t$. \\
+			$BN_{vnf_k}(t)$		& The backup node deployed $vnf_m$ at time $t$. \\
+			$T_s$	& The switch time. \\
+			$S_{vnf_m}(t)$	& The sate of $vnf_m$ at time $t$. $S_{vnf_m}(t) \in \{0,1\}$\\
+			$Tr_{vnf_m}(t)$	& The traffic of $vnf_m$ at time $t$. $Tr_{vnf_m}(t) \in [0,1]$\\
+			$APP_{vnf_m}(t)$	& Set of application used $vnf_m$ at time $t$\\
+			\hline
+			\multicolumn{2}{|c|}{VLinks State}\\
+			\hline
+			$VL$	& Set of Vlinks, $VL = \{vl_1,\dots,vl_n\}$ \\ 
+			$DT_{vl_n}$	& Set of VNF data types, $DT_{vl_n} \in \{Data, Control\}$\\
+			$SV_{vl_n}$	& The source VNF of vlink $vl_n$ \\
+			$DV_{vl_n}$	& The destination VNF of vlink $vl_n$ \\
+			$PC_{vl_n}(t)$	& Set of physical components of vlink $vl_n$ at time $t$.\\
+			$S_{vl_n}(t)$	& The sate of $vl_n$ at time $t$. $S_{vl_n}(t) \in \{0,1\}$\\
+			$APP_{vl_n}(t)$	& Set of application used $vl_n$ at time $t$\\
+			\hline
+			\multicolumn{2}{|c|}{Applications State}\\
+			\hline
+			$APP$	& Set of applications in $G$, $APP = \{app_1,\dots, app_o\}$\\
+			$VNF_{app_o}$	& SFC of $app_o$, $VNF_{app_o} = [vnf_1,\dots]$ \\
+			$Tr_{app_o}(t)$	& The total traffic of application. \\
+			$WAUT_{app_o}(t)$ & The weighted accumulation unavailable time of $app_o$. \\
+			$A_{app_o}(t)$	& The availability of $app_o$.\\
+			\hline
+		\end{tabular}
+	\end{table}
 
     \section{Network Evolution Modelling}
-    
+
+    In order to assess the application availability of cloud virtualized network, the failure criterion of the application need to be clarified. In the cloud virtualized network, there are lots of factors influence the performance of the applications, such as time delay, bandwidth and jitters. This are the per formance parameters of the applications, all these parameters are make sense only when the application path is unobstructed. Therefore the interruption could be seen as the most important failure of the application. So we can define the availability of application as:
+
+    \begin{equation}
+    	A_{app_l}(t) = 1 - \frac{AUT_{app_k}(t)}{t}
+    \end{equation}
+
+    where the accumulate unavailable time $AUT_{app_k}(t)$ is the totalinterruption time of application appl in time period $[0, t]$.
+
+    The availability of physical components usually can be get by:
+
+    \begin{equation}
+    	A = \frac{MTBF}{MTBF + MTTR}
+    \end{equation}
+
+    The mean time before failure and the mean time to repair can be obtained by the product brochure. However,the application in the cloud virtualized network is a chain of different VNFs. The MTBF and the MTTR of the application or the VNF can can not directly obtained, and the virtual link between two different VNFs is dynamically changed according to the orchestration strategy. So we cannot assess the availability of applications in this network through Eq. 2 or through the RBD method. A method that can model the dynamical dependency between the physical devices and VNFs, and assess the availability of the application is needed. 
+
+    The network evolution model [16] is an generalized framework to represent the dynamical behavior of network. Theauthors in [16] use it to evaluate the availability of Automatically Switched Optical Network (ASON), which is anotherlizednetwork. But their work is not suitable for the network withvirtualized layer, so we generalize these model to the cloud network and propose a new method for the virtualized network systems.
+
+    \subsection{Frame work of Cloud Virtualized network}
     A schematic diagram of the structure of a typical cloud-based virtualized network is shown in Fig. \ref{fig1}.
     The network structure is a fat tree structure. The network terminal sends requests and receives data through two
     multiplexed data center gateways (DCGW). There are two layers of switches in the network, inter-rack switches (EOR)
@@ -575,99 +657,12 @@
 
     Network node information refers to the basic components of the network composed of hardware devices such as Server, VMM, VM, and processes or virtualized software units in the network. In a cloud-based virtualized network, the node types of each network node are heterogeneous, so different network node types need to be described. Here, we divide the network node types into 4 categories: Server nodes, VMM nodes, VM nodes, and Proc nodes (specifically, Proc1, Proc2, and Proc3 nodes correspond to the three different types of services loaded on them). At the same time, the state of the node is used to characterize whether the current state of the node is faulty. Examples of node information are shown in \ref{tab1}, and the red part is an example of table content. For cloud-based virtualized networks, we found through research on relevant information provided by Huawei that network failures mainly occurred on network nodes. At the same time, a network node may have multiple independent failure modes, which will affect the design of subsequent network evolution conditions.
 
-    \begin{table}[!t]
-        \renewcommand{\arraystretch}{1.3}
-        \caption{Cloud virtualization network node information}
-        \label{tab1}
-        \centering
-        \begin{tabular}{|l||l|}
-            \hline
-            Symbol       & Discription                                         \\
-            \hline
-            NodeID       & Describe the unique identifier of the node          \\
-            NodeType     & Describe the type of node                           \\
-            NodeFailType & The failure mode type of the node                   \\
-            NodeFailMTBF & Mean time to failure of the failure type (h)        \\
-            NodeFailFDR  & Detection rate after failure                        \\
-            NodeFailFDT  & Fault detection time (h)                            \\
-            NodeFailAFRR & Probability of automatic repair for software faults \\
-            NodeFailAFRT & Automatic repair time for software faults (h)       \\
-            NodeFailMTTR & Mean time to repair                                 \\
-            NodeFailSR   & Switch Probability                                  \\
-            NodeFailST   & Switch Time                                         \\
-            NodeState    & Indicates whether the node has failed.              \\
-            NodeIdle     & Indicates whether the node is idle                  \\
-            Tasp         & Time of calling for check(h)                        \\
-            Tchk         & Check time(h)                                       \\
-            \hline
-        \end{tabular}
-    \end{table}
-
     Network link information refers to the flow path between different nodes in the network. There are two links here, one is the north-south link for sending data from the upper node to the lower node, and the other is the east-west link for mutual control of time and data transfer between nodes of the same kind (for example, for Nway services). That is, the VM node of its business deployment needs to exchange information with the VM node of the flow balancer). For each link, the information of its source and sink nodes is required. At the same time, information about its link capacity and flow is needed. The data dictionary of the link information is shown in \ref{tab2}.
 
-    \begin{table}[!t]
-        \renewcommand{\arraystretch}{1.3}
-        \caption{Cloud virtualization network link information}
-        \label{tab2}
-        \centering
-        \begin{tabular}{|l||l|}
-            \hline
-            Symbol              & Discription                     \\
-            \hline
-            EdgeID              & Describe link unique identifier \\
-            EdgeSourceNode      & The source node of the link     \\
-            EdgeDestinationNode & The sink node of the link       \\
-            EdgeCapacity        & Link capacity (GBp/s)           \\
-            EdgeTraffice        & Link flow (GBp/s)               \\
-            \hline
-        \end{tabular}
-    \end{table}
-
     \subsubsection{Network Application layer modeling}
-    In a cloud-based virtualized network, different network elements (Network Function, NF) are combined to form a network service (Netwrok Service, NS), and the network service is a service chain formed by a network service used by two end users  (Service Function Chain, SFC). In order to solve the availability of the service, it is necessary to model the network services invoked by the service and the basic network elements occupied by each network service. The business information of the NFV network can be represented by \ref{tab3}.
-    \begin{table}[!t]
-        \renewcommand{\arraystretch}{1.3}
-        \caption{Cloud virtualization network application information}
-        \label{tab3}
-        \centering
-        \begin{tabular}{|l||l|}
-            \hline
-            Symbol                 & Discription                                     \\
-            \hline
-            ApplicationID          & Unique identifier describing the business       \\
-            ApplicaitonVNFs        & Describe the SFC called by the application      \\
-            ApplicationWorkPath    & Describe the current application link           \\
-            ApplicationAvail       & The availability of the application             \\
-            ApplicationDownTime    & Cumulative unavailable time of business         \\
-            ApplicationStatus      & Describe whether the current business is normal \\
-            ApplicationInitTraffic & Record initial traffic                          \\
-            ApplicationTraffic     & Describe the relative value of current traffic  \\
-            ApplicationThreshold   & Describe the minimum flow threshold             \\
-            \hline
-        \end{tabular}
-    \end{table}
+    In a cloud-based virtualized network, different network elements (Network Function, NF) are combined to form a network service (Netwrok Service, NS), and the network service is a service chain formed by a network service used by two end users  (Service Function Chain, SFC). In order to solve the availability of the service, it is necessary to model the network services invoked by the service and the basic network elements occupied by each network service. The business information of the NFV network can be represented by 
 
     Services will call different VNFs. These VNFs are divided into three different types according to their backup conditions: non-backup services, cold backup services, and hot backup services. They are deployed on different types of VM nodes. For network services, since this project mainly focuses on whether the service is interrupted, the service attributes can be designed as shown in \ref{tab4}.
-    \begin{table}[!t]
-        \renewcommand{\arraystretch}{1.3}
-        \caption{Cloud virtualization network VNF information}
-        \label{tab3}
-        \centering
-        \begin{tabular}{|l||l|}
-            \hline
-            Symbol        & Discription                              \\
-            \hline
-            VNFID         & The unique identifier of the network VNF \\
-            VNFBackupType & Service backup types                     \\
-            VNFDeployNode & Master nodes of the VNF                  \\
-            VNFBackupNode & Slayer nodes of the VNF                  \\
-            VNFFailSR     & Switch rate                              \\
-            VNFFailST     & Switch time                              \\
-            VNFSwitchPath & Switch Path                              \\
-            VNFWait       & The state of the VNF                     \\
-            \hline
-        \end{tabular}
-    \end{table}
 
     \subsection{The evolution conditions of cloud virtualised network}
     Network evolution conditions are mainly caused by the interruption of top-level network services under different failure modes of different devices. At the same time, the network failure of the top node will cause the failure of the bottom node according to a certain probability. At the same time, network nodes will be repaired due to automatic repair and manual repair. Therefore, the main ideas for the design of network evolution conditions are as follows:
@@ -738,14 +733,118 @@
     After traversing the faulty node, the reliability calculation of all services is started. The reliability of the i-th service is $1-(\sum App\_unavailtime^i(t)/T)$, and the reliability of the entire network is $R_{Application}(T)=\sum_i^{N_{Application}}w_iR_A ^i(T)$ At this time, a simulation cycle is completed, and the cycle counts i+1, and loops until i reaches the expected number of calculations input.
 
     After completing the simulation of the expected number of calculations, the business reliability of the i-th service is $R_A^i(T)/N$, and the reliability of the entire network is $R_{Application}(T)/N$.
+    
+    \begin{algorithm}[t]
+    	\caption{The availability evaluation algorithm}
+    	\label{algo:event}
+    	\LinesNumbered
+    	\KwIn{Inital network state $G(0)$; Calculating parameters $T$ and $N$.}
+    	\KwOut{The availbity of each application $\{A_{app_1},\dots,A_{app_o}\}$. }
+    	Initialization. \;
+    	\For{i=1:N}{
+		   	$t = 0$ \;
+    		Generate the evolution condition $ES$ in time $[0,T]$ of each components. \;\
+    		\For{$j\in ES$}{
+			    $t_{next} = t + ES_j^T$ \;
+    			$C(t_{next}), ES_j^{VNF}, ES_j^{VL} = update\_components\_state(ES_j^{FC}, ES_j^{RC}, C(t))$ \;
+    			$ES_j^{APP_{VNF}}, VNF(t_{next}) = update\_vnf\_state(ES_j^{VNF}, VNF(t))$ \;
+    			$ES_j^{APP_{VL}}, VL(t_{next}) = update\_vlink\_state(ES_j^{VL}, VL(t))$ \;
+    			$APP(t_{next}) = update\_application\_state(ES_j^{APP_{VNF}}, ES_j^{APP_{VL}})$ \;
+				$t = t_{next}$\;
+    		}
+    		$A_{app_o}^i(T) = 1 - \frac{WAUT_{app_o}(T)}{T}$\;
+    	}
+    	\For{i=1:o}{
+    		$A_{app_o}(T) = \frac{\sum_{j=1}^{N} A_{app_o}^j(T)}{N}$ \;
+    	}
+    \end{algorithm}
 
-    \begin{figure}[!t]
-        \begin{center}
-            \includegraphics[width = 3in]{img/9.eps}
-            \caption{Reliability evaluation model}
-            \label{fig9}
-        \end{center}
-    \end{figure}
+    \begin{algorithm}[t]
+		\caption{$update\_components\_state$}
+		\label{algo:event}
+		\LinesNumbered
+		\KwIn{$ES_j^{FC}, ES_j^{RC}, C(t)$}
+		\KwOut{ $C(t_{next}), ES_j^{VNF}, ES_j^{VL}$}
+		\For{$c_l \ in ES_j^{FC}$}{
+			$S_{c_l}(t_{next}) = 0$\;
+			$ES_j^{VNF}.append(DVNF_{c_l}(t))$\;
+			$ES_j^{VL}.append(DVL_{c_l}(t))$\;
+		} 
+	
+		\For{$c_l \ in ES_j^{RC}$}{
+			$S_{c_l}(t_{next}) = 1$\;
+			$ES_j^{VNF}.append(DVNF_{c_l}(t))$\;
+			$ES_j^{VL}.append(DVL_{c_l}(t))$\;	
+		}
+	\end{algorithm}
+
+
+
+    \begin{algorithm}[t]
+		\caption{$update\_vnf\_state$}
+		\label{algo:event}
+		\LinesNumbered
+		\KwIn{$ES_j^{VNF}, VNF(t)$}
+		\KwOut{ $ES_j^{APP_{VNF}}, VNF(t_{next})$}
+		\For{$vnf \in ES_j^{VNF}$}{
+			\uIf{$BT_{vnf} = VBT_1$}{
+				$S_{vnf} = 0$\;
+				$ES_j^{APP_{VNF}}.append(APP_{vnf}(t))$\;
+			} \uElseIf{$BT_{vnf} = VBT_2$}{
+				\uIf{$random()<P_s$}{
+					$DN_{vnf}(t_{next}), BN_{vnf}(t_{next}) = DN_{vnf}(t), BN_{vnf}(t) $\;
+				}\Else{
+					$S_{vnf} = 0$ \;
+					$ES_j^{APP_{VNF}}.append(APP_{vnf}(t))$\;
+				}
+			} \uElseIf{$BT_{vnf} = VBT_3$}{
+				\uIf{$random()<P_s$}{
+					$S_{vnf}[ES] = 0$\;
+					$Tr_{vnf}[ES] += \frac{1}{n}$\;
+				}\Else{
+					$S_{vnf} = 0$ \;
+					$ES_j^{APP_{VNF}}.append(APP_{vnf}(t))$\;
+				}		
+			} \Else{
+				break \;
+			}
+		}
+	\end{algorithm}
+
+    \begin{algorithm}[t]
+		\caption{$update\_vlink\_state$}
+		\label{algo:event}
+		\LinesNumbered
+		\KwIn{$ES_j^{VL}, VL(t)$}
+		\KwOut{ $ES_j^{APP_{VL}}, VL(t_{next})$}
+		\For{$vl \in ES_j^{VL}$}{
+			update $PC_{vl}(t)$ \;
+			update $S_{vl}(t)$ \;
+			$ES_j^{APP_{VL}}.append(APP_{vl}(t))$ \;
+		}
+	\end{algorithm}
+	
+	\begin{algorithm}[t]
+		\caption{$update\_application\_state$}
+		\label{algo:event}
+		\LinesNumbered
+		\KwIn{$ES_j^{APP_{VNF}}, ES_j^{APP_{VL}}$}
+		\KwOut{ $APP(t_{next})$}
+		\For{$app \in ES_j^{APP_{VNF}} \cup ES_j^{APP_{VL}}$}{
+			update $Tr_{app}(t)$\;
+			$ WAUT_{app}(t) += (1 - Tr_{app}(t)) * (t_{next} - t)$ \;
+		}
+	\end{algorithm}
+
+
+
+%    \begin{figure}[!t]
+%        \begin{center}
+%            \includegraphics[width = 3in]{img/9.eps}
+%            \caption{Reliability evaluation model}
+%            \label{fig9}
+%        \end{center}
+%    \end{figure}
 
 
     \section{Case analysis and discussion}
